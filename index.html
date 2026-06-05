@@ -171,7 +171,7 @@ function getParams() {
 }
 
 function buildURL(p) {
-  return `poster.html?tz=${encodeURIComponent(p.tz)}&theme=${p.theme}&size=${p.size}${p.clock==='24'?'&clock=24':''}`;
+  return `poster.html?tz=${encodeURIComponent(p.tz)}&theme=${p.theme}&size=${p.size}${p.clock==='24'&&!['ET','CT','MT','PT','BST'].includes(p.tz)?'&clock=24':''}`;
 }
 
 function update() {
@@ -192,12 +192,14 @@ function update() {
     tvTag.textContent = 'FOX / FS1';
     fmtTag.textContent = 'MM/DD';
     document.getElementById('clock-toggle').style.display='none';
+    document.getElementById('sel-clock').value='12';
     info.textContent = 'US broadcast channels included. Print on Letter paper, landscape, scale to fit, enable background graphics.';
   } else if (p.tz === 'BST') {
     tvTag.textContent = 'BBC / ITV';
     fmtTag.textContent = 'DD/MM';
     document.getElementById('clock-toggle').style.display='block';
     document.getElementById('clock-toggle').style.display='none';
+    document.getElementById('sel-clock').value='12';
     info.textContent = 'UK broadcast channels (group stage confirmed, knockout TBC). Dates in DD/MM format.';
   } else {
     tvTag.textContent = 'Times only';
