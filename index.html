@@ -198,6 +198,7 @@ function update() {
     tvTag.textContent = 'BBC / ITV';
     fmtTag.textContent = 'DD/MM';
     document.getElementById('clock-toggle').style.display='block';
+    document.getElementById('sel-clock').value='24';
     document.getElementById('clock-toggle').style.display='none';
     document.getElementById('sel-clock').value='12';
     info.textContent = 'UK broadcast channels (group stage confirmed, knockout TBC). Dates in DD/MM format.';
@@ -205,6 +206,7 @@ function update() {
     tvTag.textContent = 'Times only';
     fmtTag.textContent = 'DD/MM';
     document.getElementById('clock-toggle').style.display='block';
+    document.getElementById('sel-clock').value='24';
     info.textContent = 'Dates in ' + fmtTag.textContent + ' format. Print on landscape, scale to fit, enable background graphics.';
   }
   
