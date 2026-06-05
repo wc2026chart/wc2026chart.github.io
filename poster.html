@@ -458,7 +458,7 @@ V.forEach(v=>{
         else{oP=38;wP=176;}
         const flankW=(oP/wP*100).toFixed(1)+'%';
         const edgeL=flankW,edgeR=((oP+100)/wP*100).toFixed(1)+'%';
-        const tD=time.includes(':')?time.replace(/p$/,''):time;
+        const tD=(time.includes(':')&&chan)?time.replace(/[ap]$/,''):time;
         const flanks=`<div class="mc-flank mc-flank-l" style="width:${flankW}"></div><div class="mc-flank mc-flank-r" style="width:${flankW}"></div>`;
         let inner=flanks;
         if(isKO){
@@ -591,7 +591,7 @@ Object.keys(GROUPS).forEach(g=>{
   gH+='<div class="grp-box"><div class="grp-hdr">GROUP '+g+'</div>';
   GROUPS[g].forEach(([iso,ab,nm])=>{gH+=`<div class="grp-team"><div class="fl-wrap"><img class="fl" src="https://flagcdn.com/w80/${iso}.png" alt="${ab}"></div><span class="ab">${ab}</span><span class="nm">${nm}</span></div>`});
   gH+='<div class="grp-matches">';
-  GM[g].forEach(s=>{const p=s.split(' ');const tD=p[4].includes(':')?p[4].replace(/p$/,''):p[4];
+  GM[g].forEach(s=>{const p=s.split(' ');const tD=(p[4].includes(':')&&p[5])?p[4].replace(/[ap]$/,''):p[4];
     gH+=`<div class="gm-row"><span class="gm-mn">#${p[0]}</span><span class="gm-dt">${fmtDt(p[1])}</span><span class="gm-tm">${p[2]} <span style="color:${P.textGold}">v</span> ${p[3]}</span><span class="gm-ti">${tD}${p[5]?'·'+p[5]:''}</span></div>`});
   gH+='</div></div>';
 });
