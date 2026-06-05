@@ -122,6 +122,7 @@ const TZ_DATE_FMT={ET:'us',CT:'us',MT:'us',PT:'us'};
 // Everyone except the US uses DD/MM — default to 'uk' for all others
 const dateFmtDefault='uk';
 const SIZE=params.get('size')||'22x17';
+const CLOCK=params.get('clock')||'12';
 const offset=TZ_OFF[TZ]||0;
 const tvMode=TZ_TV_MODE[TZ]||'us';
 const dateFmt=TZ_DATE_FMT[TZ]||dateFmtDefault;
@@ -156,6 +157,21 @@ function shiftDt(d,s){
   if(dy<1){mo--;dy+=dim[mo]||30}
   else if(dy>(dim[mo]||30)){dy-=dim[mo]||30;mo++}
   return mo+'/'+dy;
+}
+function fmt24(t){
+  if(CLOCK!=='24')return t;
+  let h,mi=0;
+  if(t==='12a'){h=0}
+  else if(t.endsWith('a')){
+    if(t.includes(':')){const p=t.replace(/a$/,'').split(':');h=parseInt(p[0]);mi=parseInt(p[1]);if(h===12)h=0}
+    else{h=parseInt(t);if(h===12)h=0}
+  }else if(t.endsWith('p')){
+    if(t.includes(':')){const p=t.replace(/p$/,'').split(':');h=parseInt(p[0]);mi=parseInt(p[1]);if(h!==12)h+=12}
+    else{h=parseInt(t);if(h!==12)h+=12}
+  }else if(t.includes(':')){
+    const p=t.split(':');h=parseInt(p[0]);mi=parseInt(p[1]);if(h!==12)h+=12
+  }else return t;
+  return h+':'+String(mi).padStart(2,'0');
 }
 function fmtDt(d){return dateFmt==='uk'?d.split('/').reverse().join('/'):d}
 
@@ -360,7 +376,8 @@ const gsStartDay=gsMinDate%100;
   const firstDay=gsStartDay;const lastDay=ddEndDay;
   const datesText=dateFmt==='uk'?firstDay+' JUNE \u2013 '+lastDay+' JULY':'JUNE '+firstDay+' \u2013 JULY '+lastDay;
   const tvText=tvMode==='us'?'FOX / FS1':tvMode==='uk'?'BBC / ITV':'';
-  const infoLine2='All times '+TZ_NAME[TZ]+(tvText?' \u00a0|\u00a0 '+tvText:'');
+  const clockLabel=CLOCK==='24'?' (24h)':'';
+  const infoLine2='All times '+TZ_NAME[TZ]+clockLabel+(tvText?' \u00a0|\u00a0 '+tvText:'');
   tb.innerHTML='<h1>2026 <span class="year">FIFA World Cup</span></h1>'+
     '<div class="hosts"><span style="color:'+P.textHost[0]+'">CANADA</span> <span style="color:'+P.dotColor+'">\u2022</span> <span style="color:'+P.textHost[1]+'">MEXICO</span> <span style="color:'+P.dotColor+'">\u2022</span> <span style="color:'+P.textHost[2]+'">USA</span></div>'+
     '<div class="dates" style="margin-left:85px">'+datesText+'</div>'+
@@ -487,7 +504,7 @@ V.forEach(v=>{
         else{oP=SZ.cellGSo;wP=SZ.cellGS;}
         const flankW=(oP/wP*100).toFixed(1)+'%';
         const edgeL=flankW,edgeR=((oP+100)/wP*100).toFixed(1)+'%';
-        const tD=(time.includes(':')&&chan)?time.replace(/[ap]$/,''):time;
+        const tD=fmt24((time.includes(':')&&chan)?time.replace(/[ap]$/,''):time);
         const flanks=`<div class="mc-flank mc-flank-l" style="width:${flankW}"></div><div class="mc-flank mc-flank-r" style="width:${flankW}"></div>`;
         let inner=flanks;
         if(isKO){
@@ -620,7 +637,7 @@ Object.keys(GROUPS).forEach(g=>{
   gH+='<div class="grp-box"><div class="grp-hdr">GROUP '+g+'</div>';
   GROUPS[g].forEach(([iso,ab,nm])=>{gH+=`<div class="grp-team"><div class="fl-wrap"><img class="fl" src="https://flagcdn.com/w80/${iso}.png" alt="${ab}"></div><span class="ab">${ab}</span><span class="nm">${nm}</span></div>`});
   gH+='<div class="grp-matches">';
-  GM[g].forEach(s=>{const p=s.split(' ');const tD=(p[4].includes(':')&&p[5])?p[4].replace(/[ap]$/,''):p[4];
+  GM[g].forEach(s=>{const p=s.split(' ');const tD=fmt24((p[4].includes(':')&&p[5])?p[4].replace(/[ap]$/,''):p[4]);
     gH+=`<div class="gm-row"><span class="gm-mn">#${p[0]}</span><span class="gm-dt">${fmtDt(p[1])}</span><span class="gm-tm">${p[2]} <span style="color:${P.textGold}">v</span> ${p[3]}</span><span class="gm-ti">${tD}${p[5]?'·'+p[5]:''}</span></div>`});
   gH+='</div></div>';
 });

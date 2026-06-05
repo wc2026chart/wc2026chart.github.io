@@ -109,6 +109,13 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
           <option value="UTC+13">UTC+13 · Tonga</option>
         </optgroup>
       </select>
+      <div id="clock-toggle" style="margin-top:10px;display:none">
+        <label style="font-size:10px;letter-spacing:1.5px;margin-bottom:6px">Clock Format</label>
+        <select id="sel-clock" onchange="update()" style="width:100%;padding:8px 12px;background:var(--bg);color:var(--text);border:1px solid var(--card-border);border-radius:6px;font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238890aa' stroke-width='1.5' fill='none'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 12px center">
+          <option value="24">24-hour (15:00)</option>
+          <option value="12">12-hour (3p)</option>
+        </select>
+      </div>
     </div>
     <div class="config-group">
       <label>Paper Size</label>
@@ -158,12 +165,13 @@ function getParams() {
   return {
     theme: document.getElementById('sel-theme').value,
     tz: document.getElementById('sel-tz').value,
-    size: document.getElementById('sel-size').value
+    size: document.getElementById('sel-size').value,
+    clock: document.getElementById('sel-clock').value
   };
 }
 
 function buildURL(p) {
-  return `poster.html?tz=${encodeURIComponent(p.tz)}&theme=${p.theme}&size=${p.size}`;
+  return `poster.html?tz=${encodeURIComponent(p.tz)}&theme=${p.theme}&size=${p.size}${p.clock==='24'?'&clock=24':''}`;
 }
 
 function update() {
@@ -183,14 +191,18 @@ function update() {
   if (usZones.includes(p.tz)) {
     tvTag.textContent = 'FOX / FS1';
     fmtTag.textContent = 'MM/DD';
+    document.getElementById('clock-toggle').style.display='none';
     info.textContent = 'US broadcast channels included. Print on Letter paper, landscape, scale to fit, enable background graphics.';
   } else if (p.tz === 'BST') {
     tvTag.textContent = 'BBC / ITV';
     fmtTag.textContent = 'DD/MM';
+    document.getElementById('clock-toggle').style.display='block';
+    document.getElementById('clock-toggle').style.display='none';
     info.textContent = 'UK broadcast channels (group stage confirmed, knockout TBC). Dates in DD/MM format.';
   } else {
     tvTag.textContent = 'Times only';
     fmtTag.textContent = 'DD/MM';
+    document.getElementById('clock-toggle').style.display='block';
     info.textContent = 'Dates in ' + fmtTag.textContent + ' format. Print on landscape, scale to fit, enable background graphics.';
   }
   
