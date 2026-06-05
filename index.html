@@ -37,7 +37,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .btn-outline{background:var(--card);color:var(--text);border:1px solid var(--card-border)}
 .btn-outline:hover{border-color:var(--gold);box-shadow:0 8px 24px rgba(201,168,48,0.15)}
 
-.preview-wrap{max-width:1200px;margin:0 auto 30px;padding:0 20px}
+.preview-wrap{max-width:100%;margin:0 auto 30px;padding:0 40px;padding:0 20px}
 .preview-label{font-size:12px;text-transform:uppercase;letter-spacing:2px;color:var(--text-dim);margin-bottom:8px}
 .preview-box{position:relative;width:100%;padding-top:0;background:var(--card);border-radius:8px;border:1px solid var(--card-border);overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.4)}
 .preview-box iframe{position:absolute;top:0;left:0;width:var(--pw,3300px);height:var(--ph,2512px);border:none;transform-origin:0 0}
@@ -124,7 +124,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
     <span class="tag" id="tag-tv">FOX / FS1</span>
     <span class="tag" id="tag-fmt">MM/DD</span>
     <span class="tag">300 DPI</span>
-    <span class="info-text" id="info-text">US broadcast channels included. Print at 31% scale, landscape orientation, enable background graphics.</span>
+    <span class="info-text" id="info-text">US broadcast channels included. Print on Letter paper, landscape, scale to fit, enable background graphics.</span>
   </div>
 </div>
 
@@ -144,7 +144,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 
 <div class="how-to">
   <h2>How to Print</h2>
-  <p><strong>Option A — Browser print:</strong> Click "Open Poster", then <code>Ctrl+P</code> (or <code>⌘P</code>). Set paper to <strong>Tabloid (11×17")</strong>, orientation <strong>Landscape</strong>, scale <strong>31%</strong>, and check <strong>"Background graphics"</strong>.</p>
+  <p><strong>Option A — Browser print:</strong> Click "Open Poster", then <code>Ctrl+P</code> (or <code>⌘P</code>). Set paper to <strong>Letter (8.5×11")</strong>, orientation <strong>Landscape</strong>, scale to <strong>Fit</strong>, and check <strong>"Background graphics"</strong>.</p>
   <p><strong>Option B — Print shop:</strong> Download the HTML and send to a local print shop. They can render it at full resolution for large format printing.</p>
   <p><strong>Direct URL:</strong> You can also link directly to any variant: <code>poster.html?tz=BST&theme=light</code></p>
 </div>
@@ -184,7 +184,7 @@ function update() {
   if (usZones.includes(p.tz)) {
     tvTag.textContent = 'FOX / FS1';
     fmtTag.textContent = 'MM/DD';
-    info.textContent = 'US broadcast channels included. Print at 31% scale, landscape, enable background graphics.';
+    info.textContent = 'US broadcast channels included. Print on Letter paper, landscape, scale to fit, enable background graphics.';
   } else if (p.tz === 'BST') {
     tvTag.textContent = 'BBC / ITV';
     fmtTag.textContent = 'DD/MM';
@@ -217,7 +217,10 @@ function printPoster() {
 function scalePreview() {
   const box = document.querySelector('.preview-box');
   const iframe = document.getElementById('preview');
-  if (!box || !iframe) return;
+  const wrap = document.querySelector('.preview-wrap');
+  if (!box || !iframe || !wrap) return;
+  const sz = getParams().size;
+  // Full width, aspect ratio determines height
   const sizeW = {'22x17':3300,'24x16':3768,'24x36':3768}[getParams().size] || 3300;
   const sizeH = {'22x17':2512,'24x16':2512,'24x36':5652}[getParams().size] || 2512;
   const scale = box.offsetWidth / sizeW;
