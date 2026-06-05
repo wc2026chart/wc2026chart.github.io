@@ -73,16 +73,41 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
     <div class="config-group">
       <label>Time Zone</label>
       <select id="sel-tz" onchange="update()">
-        <option value="ET">Eastern US (ET)</option>
-        <option value="CT">Central US (CT)</option>
-        <option value="MT">Mountain US (MT)</option>
-        <option value="PT">Pacific US (PT)</option>
-        <option value="UTC">UTC</option>
-        <option value="BST">UK (BST)</option>
-        <option value="CEST">Central Europe (CEST)</option>
-        <option value="GST">Gulf (GST)</option>
-        <option value="AEST">Australia Eastern (AEST)</option>
-        <option value="NZST">New Zealand (NZST)</option>
+        <optgroup label="🇺🇸 US &amp; 🇬🇧 UK — with TV channels">
+          <option value="ET">Eastern US (ET) — FOX / FS1</option>
+          <option value="CT">Central US (CT) — FOX / FS1</option>
+          <option value="MT">Mountain US (MT) — FOX / FS1</option>
+          <option value="PT">Pacific US (PT) — FOX / FS1</option>
+          <option value="BST">UK (BST) — BBC / ITV</option>
+        </optgroup>
+        <optgroup label="All Time Zones — times only">
+          <option value="UTC-11">UTC−11 · Samoa</option>
+          <option value="UTC-10">UTC−10 · Hawaii</option>
+          <option value="UTC-9">UTC−9 · Alaska</option>
+          <option value="UTC-8">UTC−8 · Pacific Std</option>
+          <option value="UTC-7">UTC−7 · Mountain Std</option>
+          <option value="UTC-6">UTC−6 · Central Std / Mexico City</option>
+          <option value="UTC-5">UTC−5 · Eastern Std / Colombia</option>
+          <option value="UTC-4">UTC−4 · Atlantic / Venezuela</option>
+          <option value="UTC-3">UTC−3 · Argentina / São Paulo</option>
+          <option value="UTC-2">UTC−2 · Mid-Atlantic</option>
+          <option value="UTC-1">UTC−1 · Cape Verde / Azores</option>
+          <option value="UTC+0">UTC+0 · GMT / Iceland / Ghana</option>
+          <option value="UTC+1">UTC+1 · West Africa / Nigeria</option>
+          <option value="UTC+2">UTC+2 · South Africa / Cairo</option>
+          <option value="UTC+3">UTC+3 · Moscow / Saudi Arabia</option>
+          <option value="UTC+4">UTC+4 · Dubai / UAE</option>
+          <option value="UTC+5">UTC+5 · Pakistan</option>
+          <option value="UTC+5:30">UTC+5:30 · India / Sri Lanka</option>
+          <option value="UTC+6">UTC+6 · Bangladesh</option>
+          <option value="UTC+7">UTC+7 · Thailand / Vietnam</option>
+          <option value="UTC+8">UTC+8 · China / Singapore / Perth</option>
+          <option value="UTC+9">UTC+9 · Japan / Korea</option>
+          <option value="UTC+10">UTC+10 · Australia East / Sydney</option>
+          <option value="UTC+11">UTC+11 · Solomon Islands</option>
+          <option value="UTC+12">UTC+12 · New Zealand / Fiji</option>
+          <option value="UTC+13">UTC+13 · Tonga</option>
+        </optgroup>
       </select>
     </div>
     <div class="config-group">
@@ -159,15 +184,16 @@ function update() {
   if (usZones.includes(p.tz)) {
     tvTag.textContent = 'FOX / FS1';
     fmtTag.textContent = 'MM/DD';
-    info.textContent = 'US broadcast channels included. Print at 31% scale, landscape orientation, enable background graphics.';
+    info.textContent = 'US broadcast channels included. Print at 31% scale, landscape, enable background graphics.';
   } else if (p.tz === 'BST') {
     tvTag.textContent = 'BBC / ITV';
     fmtTag.textContent = 'DD/MM';
     info.textContent = 'UK broadcast channels (group stage confirmed, knockout TBC). Dates in DD/MM format.';
   } else {
     tvTag.textContent = 'Times only';
-    fmtTag.textContent = p.tz === 'CEST' ? 'MM/DD' : 'MM/DD';
-    info.textContent = 'No broadcast channel info. Print at 31% scale, landscape orientation, enable background graphics.';
+    const usDateZones = ['UTC-11','UTC-10','UTC-9','UTC-8','UTC-7'];
+    fmtTag.textContent = usDateZones.includes(p.tz) ? 'MM/DD' : 'DD/MM';
+    info.textContent = 'Times only, no TV channel info. Dates in ' + fmtTag.textContent + ' format.';
   }
   
   // Update preview iframe
@@ -200,11 +226,16 @@ function scalePreview() {
 window.addEventListener('resize', scalePreview);
 
 function autoDetectTZ() {
-  const offset = new Date().getTimezoneOffset(); // minutes behind UTC
-  const map = {240:'ET', 300:'CT', 360:'MT', 420:'PT', 0:'BST', '-60':'CEST', '-120':'CEST', '-240':'GST'};
-  // Summer offsets (DST): ET=-240, CT=-300, MT=-360, PT=-420, BST=-60, CEST=-120
-  const summerMap = {'-240':'ET', '-300':'CT', '-360':'MT', '-420':'PT', '-60':'BST', '-120':'CEST', '-240':'GST'};
-  const detected = summerMap[String(-offset)] || map[String(-offset)];
+  const offMin = -new Date().getTimezoneOffset(); // UTC offset in minutes
+  // Try featured zones first (with TV)
+  const featured = {'-240':'ET','-300':'CT','-360':'MT','-420':'PT','60':'BST'};
+  let detected = featured[String(offMin)];
+  if (!detected) {
+    // Map to nearest UTC offset
+    const offH = Math.round(offMin / 30) * 0.5; // round to nearest half hour
+    if (offH === Math.floor(offH)) detected = 'UTC' + (offH >= 0 ? '+' : '') + offH;
+    else detected = 'UTC' + (offH >= 0 ? '+' : '') + Math.floor(offH) + ':30';
+  }
   if (detected) {
     const sel = document.getElementById('sel-tz');
     for (let i = 0; i < sel.options.length; i++) {

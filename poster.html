@@ -85,10 +85,46 @@
 const params=new URLSearchParams(window.location.search);
 const TZ=params.get('tz')||'ET';
 const THEME=params.get('theme')||'dark';
-const TZ_OFF={ET:0,CT:-1,MT:-2,PT:-3,UTC:4,BST:5,CEST:6,GST:8,AEST:14,NZST:16};
-const TZ_NAME={ET:'Eastern US',CT:'Central US',MT:'Mountain US',PT:'Pacific US',UTC:'UTC',BST:'UK (BST)',CEST:'Central European (CEST)',GST:'Gulf Standard (GST)',AEST:'Australian Eastern (AEST)',NZST:'New Zealand (NZST)'};
-const TZ_TV_MODE={ET:'us',CT:'us',MT:'us',PT:'us',UTC:'none',BST:'uk',CEST:'none',GST:'none',AEST:'none',NZST:'none'};
-const TZ_DATE_FMT={ET:'us',CT:'us',MT:'us',PT:'us',UTC:'us',BST:'uk',CEST:'us',GST:'us',AEST:'uk',NZST:'uk'};
+const TZ_OFF={
+  // Featured (with TV)
+  ET:0,CT:-1,MT:-2,PT:-3,BST:5,
+  // UTC offsets (from ET which is UTC-4 in summer)
+  'UTC-11':-7,'UTC-10':-6,'UTC-9':-5,'UTC-8':-4,'UTC-7':-3,'UTC-6':-2,'UTC-5':-1,
+  'UTC-4':0,'UTC-3':1,'UTC-2':2,'UTC-1':3,'UTC+0':4,
+  'UTC+1':5,'UTC+2':6,'UTC+3':7,'UTC+4':8,'UTC+5':9,'UTC+5:30':9.5,
+  'UTC+6':10,'UTC+7':11,'UTC+8':12,'UTC+9':13,'UTC+10':14,'UTC+11':15,'UTC+12':16,'UTC+13':17
+};
+const TZ_NAME={
+  ET:'Eastern US (ET)',CT:'Central US (CT)',MT:'Mountain US (MT)',PT:'Pacific US (PT)',BST:'UK (BST)',
+  'UTC-11':'UTC\u221211 (Samoa)','UTC-10':'UTC\u221210 (Hawaii)','UTC-9':'UTC\u22129 (Alaska)',
+  'UTC-8':'UTC\u22128','UTC-7':'UTC\u22127','UTC-6':'UTC\u22126 (Mexico City)',
+  'UTC-5':'UTC\u22125 (Colombia, Peru)','UTC-4':'UTC\u22124 (Atlantic)',
+  'UTC-3':'UTC\u22123 (Argentina, Brazil)','UTC-2':'UTC\u22122','UTC-1':'UTC\u22121 (Cape Verde)',
+  'UTC+0':'UTC+0 (GMT, Iceland)','UTC+1':'UTC+1 (West Africa, Nigeria)',
+  'UTC+2':'UTC+2 (South Africa, Cairo)','UTC+3':'UTC+3 (Moscow, Saudi Arabia)',
+  'UTC+4':'UTC+4 (Dubai, UAE)','UTC+5':'UTC+5 (Pakistan)',
+  'UTC+5:30':'UTC+5:30 (India, Sri Lanka)','UTC+6':'UTC+6 (Bangladesh)',
+  'UTC+7':'UTC+7 (Thailand, Vietnam)','UTC+8':'UTC+8 (China, Singapore)',
+  'UTC+9':'UTC+9 (Japan, Korea)','UTC+10':'UTC+10 (Australia East)',
+  'UTC+11':'UTC+11 (Solomon Is.)','UTC+12':'UTC+12 (New Zealand, Fiji)',
+  'UTC+13':'UTC+13 (Tonga)'
+};
+const TZ_TV_MODE={
+  ET:'us',CT:'us',MT:'us',PT:'us',BST:'uk',
+  'UTC-11':'none','UTC-10':'none','UTC-9':'none','UTC-8':'none','UTC-7':'none','UTC-6':'none',
+  'UTC-5':'none','UTC-4':'none','UTC-3':'none','UTC-2':'none','UTC-1':'none','UTC+0':'none',
+  'UTC+1':'none','UTC+2':'none','UTC+3':'none','UTC+4':'none','UTC+5':'none','UTC+5:30':'none',
+  'UTC+6':'none','UTC+7':'none','UTC+8':'none','UTC+9':'none','UTC+10':'none','UTC+11':'none',
+  'UTC+12':'none','UTC+13':'none'
+};
+const TZ_DATE_FMT={
+  ET:'us',CT:'us',MT:'us',PT:'us',BST:'uk',
+  'UTC-11':'us','UTC-10':'us','UTC-9':'us','UTC-8':'us','UTC-7':'us','UTC-6':'uk',
+  'UTC-5':'uk','UTC-4':'uk','UTC-3':'uk','UTC-2':'uk','UTC-1':'uk','UTC+0':'uk',
+  'UTC+1':'uk','UTC+2':'uk','UTC+3':'uk','UTC+4':'uk','UTC+5':'uk','UTC+5:30':'uk',
+  'UTC+6':'uk','UTC+7':'uk','UTC+8':'uk','UTC+9':'uk','UTC+10':'uk','UTC+11':'uk',
+  'UTC+12':'uk','UTC+13':'uk'
+};
 const offset=TZ_OFF[TZ]||0;
 const tvMode=TZ_TV_MODE[TZ]||'us';
 const dateFmt=TZ_DATE_FMT[TZ]||'us';
@@ -97,16 +133,20 @@ const dateFmt=TZ_DATE_FMT[TZ]||'us';
 const UK_TV={1:'ITV',2:'ITV',3:'BBC',4:'BBC',5:'ITV',6:'BBC',7:'BBC',8:'ITV',9:'ITV',10:'ITV',11:'BBC',12:'ITV',13:'ITV',14:'BBC',15:'ITV',16:'BBC',17:'BBC',18:'BBC',19:'ITV',20:'BBC',21:'BBC',22:'ITV',23:'ITV',24:'BBC',25:'BBC',26:'ITV',27:'ITV',28:'BBC',29:'BBC',30:'ITV',31:'ITV',32:'ITV',33:'BBC',34:'ITV',35:'BBC',36:'BBC',37:'BBC',38:'ITV',39:'BBC',40:'ITV',41:'BBC',42:'BBC',43:'ITV',44:'ITV',45:'ITV',46:'BBC',47:'BBC',48:'ITV',49:'ITV',50:'ITV',51:'BBC',52:'BBC',53:'BBC',54:'BBC',55:'BBC',56:'BBC',57:'BBC',58:'BBC',59:'ITV',60:'ITV',61:'ITV',62:'ITV',63:'ITV',64:'ITV',65:'BBC',66:'BBC',67:'ITV',68:'ITV',69:'BBC',70:'BBC',71:'BBC',72:'BBC'};
 
 function cvtTime(t,off){
-  let h,mi=0,ds=0;
+  let h,mi=0;
   if(t==='12a')h=0;
   else if(t.endsWith('a')){h=parseInt(t)}
   else if(t.includes(':')){const p=t.replace(/p$/,'').split(':');h=parseInt(p[0]);mi=parseInt(p[1]);if(h!==12)h+=12}
   else if(t.endsWith('p')){h=parseInt(t);if(h!==12)h+=12}
   else return[t,0];
-  h+=off;
-  if(h<0){h+=24;ds=-1}else if(h>=24){h-=24;ds=1}
+  // Work in total minutes for half-hour offset support
+  let totalMin=h*60+mi+Math.round(off*60);
+  let ds=0;
+  while(totalMin<0){totalMin+=1440;ds--}
+  while(totalMin>=1440){totalMin-=1440;ds++}
+  h=Math.floor(totalMin/60);mi=totalMin%60;
   let r;
-  if(h===0)r='12a';
+  if(h===0)r=mi?'12:'+String(mi).padStart(2,'0')+'a':'12a';
   else if(h<12)r=mi?h+':'+String(mi).padStart(2,'0')+'a':h+'a';
   else if(h===12)r=mi?'12:'+String(mi).padStart(2,'0')+'p':'12p';
   else{const x=h-12;r=mi?x+':'+String(mi).padStart(2,'0')+'p':x+'p'}
@@ -215,22 +255,13 @@ body{background-color:${P.bodyBg}!important;color:${P.textMain}!important}
 const root=document.documentElement.style;
 root.setProperty('color',P.textMain);
 
-// Populate title bar dynamically
-{
-  const tb=document.getElementById('title-bar-content');
-  const firstDay=offset>=9?12:11;const lastDay=offset>=9?20:19;
-  const datesText=dateFmt==='uk'?firstDay+' JUNE – '+lastDay+' JULY':'JUNE '+firstDay+' – JULY '+lastDay;
-  const tvText=tvMode==='us'?'FOX / FS1':tvMode==='uk'?'BBC / ITV':'';
-  const infoLine2='All times '+TZ_NAME[TZ]+(tvText?' \u00a0|\u00a0 '+tvText:'');
-  tb.innerHTML='<h1>2026 <span class="year">FIFA World Cup</span></h1>'+
-    '<div class="hosts"><span style="color:'+P.textHost[0]+'">CANADA</span> <span style="color:'+P.dotColor+'">&bull;</span> <span style="color:'+P.textHost[1]+'">MEXICO</span> <span style="color:'+P.dotColor+'">&bull;</span> <span style="color:'+P.textHost[2]+'">USA</span></div>'+
-    '<div class="dates" style="margin-left:85px">'+datesText+'</div>'+
-    '<div class="title-info">48 Teams \u00a0|\u00a0 104 Matches<br>'+infoLine2+'</div>';
-}
+// Title bar will be populated after M array scan
 
 const V=[{id:'VAN',city:'Vancouver',stad:'BC Place',co:'ca'},{id:'TOR',city:'Toronto',stad:'BMO Field',co:'ca'},{id:'MEX',city:'Mexico City',stad:'Estadio Azteca',co:'mx'},{id:'MTY',city:'Monterrey',stad:'Estadio BBVA',co:'mx'},{id:'GDL',city:'Guadalajara',stad:'Estadio Akron',co:'mx'},{id:'SFO',city:'San Francisco',stad:"Levi's Stadium",co:'us'},{id:'HOU',city:'Houston',stad:'NRG Stadium',co:'us'},{id:'PHI',city:'Philadelphia',stad:'Lincoln Financial Field',co:'us'},{id:'SEA',city:'Seattle',stad:'Lumen Field',co:'us'},{id:'BOS',city:'Boston',stad:'Gillette Stadium',co:'us'},{id:'KCM',city:'Kansas City',stad:'Arrowhead Stadium',co:'us'},{id:'LAX',city:'Los Angeles',stad:'SoFi Stadium',co:'us'},{id:'DAL',city:'Dallas',stad:'AT&T Stadium',co:'us'},{id:'ATL',city:'Atlanta',stad:'Mercedes-Benz Stadium',co:'us'},{id:'MIA',city:'Miami',stad:'Hard Rock Stadium',co:'us'},{id:'NYC',city:'New York / NJ',stad:'MetLife Stadium',co:'us'}];
-const ddEnd=offset>=9?new Date(2026,6,20):new Date(2026,6,19);
-const DD=[null];for(let d=new Date(2026,5,11);d<=ddEnd;d.setDate(d.getDate()+1))DD.push(new Date(d));DD.push(null);
+// Determine if 3pm ET (first/last match time) shifts to next day
+const [,_dayShift]=cvtTime('3p',offset);
+const ddEndDay=_dayShift>0?20:19;
+const DD=[null];for(let d=new Date(2026,5,11);d<=new Date(2026,6,ddEndDay);d.setDate(d.getDate()+1))DD.push(new Date(d));DD.push(null);
 const DOW=['SUN','MON','TUE','WED','THU','FRI','SAT'];
 const ISO={MEX:'mx',RSA:'za',KOR:'kr',CZE:'cz',CAN:'ca',BIH:'ba',QAT:'qa',SUI:'ch',BRA:'br',MAR:'ma',HAI:'ht',SCO:'gb-sct',USA:'us',PAR:'py',AUS:'au',TUR:'tr',GER:'de',CUR:'cw',CIV:'ci',ECU:'ec',NED:'nl',JPN:'jp',SWE:'se',TUN:'tn',ESP:'es',CPV:'cv',KSA:'sa',URU:'uy',BEL:'be',EGY:'eg',IRN:'ir',NZL:'nz',FRA:'fr',SEN:'sn',IRQ:'iq',NOR:'no',ARG:'ar',ALG:'dz',AUT:'at',JOR:'jo',POR:'pt',COD:'cd',UZB:'uz',COL:'co',ENG:'gb-eng',CRO:'hr',GHA:'gh',PAN:'pa'};
 const fU=c=>`https://flagcdn.com/w160/${ISO[c]||'xx'}.png`;
@@ -284,8 +315,31 @@ const mL={};M.forEach(m=>{const k=m[6]+'_'+m[1];if(!mL[k])mL[k]=[];mL[k].push(m)
 const mDays=new Set();M.forEach(m=>mDays.add(m[1]));
 const VW=263,GW=3300-VW,grpH=514;
 let tW=0;
-const gsStartDay=offset>=9?12:11;
-const gsEndDay=offset>=14?30:offset>=4?29:27;// Widen June 28-29 for shifted timezones
+// Scan converted matches to find actual group stage date range
+let gsMinDate=9999,gsMaxDate=0;
+M.forEach(m=>{
+  if(!['R32','R16','QF','SF','3RD','FIN'].includes(m[5])){
+    const[mo,dy]=m[1].split('/').map(Number);
+    const dn=mo*100+dy;
+    if(dn<gsMinDate)gsMinDate=dn;if(dn>gsMaxDate)gsMaxDate=dn;
+  }
+});
+const gsStartDay=gsMinDate%100;
+// NOW populate title bar (gsStartDay available)
+{
+  const tb=document.getElementById('title-bar-content');
+  const firstDay=gsStartDay;const lastDay=ddEndDay;
+  const datesText=dateFmt==='uk'?firstDay+' JUNE \u2013 '+lastDay+' JULY':'JUNE '+firstDay+' \u2013 JULY '+lastDay;
+  const tvText=tvMode==='us'?'FOX / FS1':tvMode==='uk'?'BBC / ITV':'';
+  const infoLine2='All times '+TZ_NAME[TZ]+(tvText?' \u00a0|\u00a0 '+tvText:'');
+  tb.innerHTML='<h1>2026 <span class="year">FIFA World Cup</span></h1>'+
+    '<div class="hosts"><span style="color:'+P.textHost[0]+'">CANADA</span> <span style="color:'+P.dotColor+'">\u2022</span> <span style="color:'+P.textHost[1]+'">MEXICO</span> <span style="color:'+P.dotColor+'">\u2022</span> <span style="color:'+P.textHost[2]+'">USA</span></div>'+
+    '<div class="dates" style="margin-left:85px">'+datesText+'</div>'+
+    '<div class="title-info">48 Teams \u00a0|\u00a0 104 Matches<br>'+infoLine2+'</div>';
+}
+
+const gsEndMo=Math.floor(gsMaxDate/100);
+const gsEndDay=gsMaxDate%100;// Widen June 28-29 for shifted timezones
 const dWts=DD.map(d=>{if(!d)return(tW+=2.2,2.2);const dn=d.getDate(),mo=d.getMonth();if(mo===5&&dn>=gsStartDay&&dn<=gsEndDay)return(tW+=4,4);return(tW+=1.8,1.8)});
 const dW=dWts.map(w=>Math.round(w*GW/tW));
 const moH=26,hdrH=71,stgH=40;
@@ -325,31 +379,58 @@ let stg='<div class="stage-strip">';
 DD.forEach((d,i)=>{const bg=d?(isEv(d)?hdrE:hdrO):hdrE;stg+=`<div class="stage-bg" style="width:${dW[i]}px;background-color:${bg}"></div>`});
 // Dynamic stage strip based on timezone
 function colMid(mo,dy){for(let i=0;i<DD.length;i++){if(DD[i]&&DD[i].getMonth()===mo&&DD[i].getDate()===dy)return colS[i]+dW[i]/2}return 0}
-const needsSplit=Math.abs(offset)>=4;// BST,CEST,UTC,GST need split columns
-let stgData;
-if(needsSplit){
-  // Determine which dates have shifted group stage matches
-  const gsEnd=offset>=5?colMid(5,28):dateRange(5,27,5,27)[1];
-  const r32Start=offset>=5?colMid(5,28):dateRange(5,28,5,28)[0];
-  const r32End=offset>=4?colMid(6,4):dateRange(6,3,6,3)[1];
-  const r16Start=offset>=4?colMid(6,4):dateRange(6,4,6,4)[0];
-  const qEnd=offset>=8?dateRange(6,12,6,12)[1]:dateRange(6,11,6,11)[1];
-  stgData=[
-    [dateRange(5,gsStartDay,5,27)[0],gsEnd,'GROUP STAGE'],
-    [r32Start,r32End,'ROUND OF 32'],
-    [r16Start,dateRange(6,7,6,7)[1],'ROUND OF 16'],
-    [dateRange(6,9,6,9)[0],qEnd,'QUARTERS'],
-    [dateRange(6,14,6,15)[0],dateRange(6,14,6,15)[1],'SEMIS'],
-    [dateRange(6,18,6,19)[0],dateRange(6,19,6,19)[1],'FINALS']
-  ];
-}else{
-  stgData=[[5,gsStartDay,5,27,'GROUP STAGE'],[5,28,6,3,'ROUND OF 32'],[6,4,6,7,'ROUND OF 16'],[6,9,6,11,'QUARTERS'],[6,14,6,15,'SEMIS'],[6,18,6,19,'FINALS']].map(([m1,d1,m2,d2,lbl])=>{const[s,e]=dateRange(m1,d1,m2,d2);return[s,e,lbl]});
-}
-stgData.forEach(([s,e,lbl])=>{const w=e-s;stg+=`<div class="stage-label-abs" style="left:${s-(w<250?8:0)}px;width:${w+(w<250?16:0)}px">${lbl}</div>`});
-// OFF days (adjust for timezone)
-let offDays=[[6,8],[6,12],[6,13],[6,16],[6,17]];
-if(offset>=8)offDays=offDays.filter(([m,d])=>!(m===6&&d===12));// GST: QF shifts to Jul 12
-if(offset>=5)offDays=offDays.filter(([m,d])=>!(m===6&&d===12));// BST+: QF may shift
+
+// Scan converted M array for actual date range of each stage
+const stageMap={};
+M.forEach(m=>{
+  const[mo,dy]=m[1].split('/').map(Number);
+  const sk=['R32','R16','QF','SF','3RD','FIN'].includes(m[5])?m[5]:'GS';
+  const key=sk==='3RD'?'FIN':sk;// combine 3RD with FINALS
+  if(!stageMap[key])stageMap[key]={minMo:mo,minDy:dy,maxMo:mo,maxDy:dy};
+  else{
+    const cur=stageMap[key];
+    if(mo*100+dy<cur.minMo*100+cur.minDy){cur.minMo=mo;cur.minDy=dy}
+    if(mo*100+dy>cur.maxMo*100+cur.maxDy){cur.maxMo=mo;cur.maxDy=dy}
+  }
+});
+
+// Build stage strip labels from actual data
+const stageOrder=[['GS','GROUP STAGE'],['R32','ROUND OF 32'],['R16','ROUND OF 16'],['QF','QUARTERS'],['SF','SEMIS'],['FIN','FINALS']];
+let stgData=[];
+stageOrder.forEach(([key,label])=>{
+  const r=stageMap[key];if(!r)return;
+  // Check if this stage's first day overlaps with previous stage's last day
+  const prev=stgData.length?stgData[stgData.length-1]:null;
+  let startPx,endPx;
+  const[rs,re]=dateRange(r.minMo-1,r.minDy,r.maxMo-1,r.maxDy);
+  startPx=rs;endPx=re;
+  // If previous stage ends on same day this one starts, split at midpoint
+  if(prev&&prev._maxMo===r.minMo&&prev._maxDy===r.minDy){
+    const mid=colMid(r.minMo-1,r.minDy);
+    prev.e=mid;// trim previous
+    startPx=mid;
+  }
+  stgData.push({s:startPx,e:endPx,label,_maxMo:r.maxMo,_maxDy:r.maxDy});
+});
+stgData.forEach(({s,e,label})=>{const w=e-s;stg+=`<div class="stage-label-abs" style="left:${s-(w<250?8:0)}px;width:${w+(w<250?16:0)}px">${label}</div>`});
+
+// OFF days: find gaps between stages
+const allMatchDates=new Set();M.forEach(m=>allMatchDates.add(m[1]));
+const offDays=[];
+DD.forEach((d,i)=>{
+  if(!d)return;
+  const k=(d.getMonth()+1)+'/'+d.getDate();
+  if(!allMatchDates.has(k)){
+    // Only mark OFF if it's between the first and last match dates
+    const dn=(d.getMonth()+1)*100+d.getDate();
+    const firstDn=gsMinDate;
+    const lastM=stageMap.FIN;
+    const lastDn=lastM?lastM.maxMo*100+lastM.maxDy:719;
+    if(dn>firstDn&&dn<lastDn){
+      offDays.push([d.getMonth(),d.getDate()]);
+    }
+  }
+});
 offDays.forEach(([mo2,dy])=>{const[s,e]=dateRange(mo2,dy,mo2,dy);if(e>s)stg+=`<div class="stage-off-abs" style="left:${s}px;width:${e-s}px">OFF</div>`});
 stg+='</div>';
 
@@ -504,8 +585,7 @@ ga.appendChild(tDiv);
 
 
 const gA=document.getElementById('groups-area');
-const gsFirstDay=offset>=9?12:11;const gsLastDay=offset>=5?28:27;
-const grpTitle=dateFmt==='uk'?'Group Stage \u2022 12 Groups \u2022 48 Teams \u2022 '+gsFirstDay+'\u201328 June 2026':'Group Stage \u2022 12 Groups \u2022 48 Teams \u2022 June '+gsFirstDay+'\u201327, 2026';
+const grpTitle=dateFmt==='uk'?'Group Stage \u2022 12 Groups \u2022 48 Teams \u2022 '+gsStartDay+'\u2013'+gsEndDay+' June 2026':'Group Stage \u2022 12 Groups \u2022 48 Teams \u2022 June '+gsStartDay+'\u2013'+gsEndDay+', 2026';
 let gH='<div class="groups-title">'+grpTitle+'</div><div class="groups-grid">';
 Object.keys(GROUPS).forEach(g=>{
   gH+='<div class="grp-box"><div class="grp-hdr">GROUP '+g+'</div>';
