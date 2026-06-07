@@ -123,7 +123,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
         <option value="22x17">Letter Landscape (11×8.5″)</option>
         <option value="A3">A3 Landscape (420×297mm)</option>
         <option value="24x16">24 × 16″ (3:2 poster)</option>
-        <option value="24x36" disabled>24 × 36″ — coming soon</option>
+        <option value="24x36">24 × 36″ (Vertical poster)</option>
       </select>
     </div>
   </div>
@@ -173,7 +173,8 @@ function getParams() {
 }
 
 function buildURL(p) {
-  return `poster.html?tz=${encodeURIComponent(p.tz)}&theme=${p.theme}&size=${p.size}${p.clock==='24'&&!['ET','CT','MT','PT','BST'].includes(p.tz)?'&clock=24':''}`;
+  const base = p.size==='24x36' ? 'poster-vertical.html' : 'poster.html';
+  return `${base}?tz=${encodeURIComponent(p.tz)}&theme=${p.theme}&size=${p.size}${p.clock==='24'&&!['ET','CT','MT','PT','BST'].includes(p.tz)?'&clock=24':''}`;
 }
 
 function update() {
