@@ -7,19 +7,19 @@
   @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
   *{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   body{width:3768px;height:5652px;font-family:'Roboto',sans-serif;background-color:#0e1025;color:#fff;position:relative;overflow:auto}
-  .title-bar{position:absolute;top:0;left:0;right:0;height:109px;background-color:#0c1128;display:flex;align-items:baseline;padding-top:18px;padding-left:285px;border-bottom:3px solid #c9a830}
-  .title-bar h1{font-size:91px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#fff;line-height:1}.title-bar .year{color:#c9a830}
-  .title-bar .hosts{font-size:66px;font-weight:700;color:#c9a830;margin-left:85px;letter-spacing:2px;line-height:1}
-  .title-bar .dates{font-size:66px;font-weight:700;color:#eef;margin-left:20px;letter-spacing:2px;line-height:1}
+  .title-bar{position:absolute;top:0;left:0;right:0;height:174px;background-color:#0c1128;display:flex;align-items:baseline;padding-top:70px;padding-left:35px;border-bottom:3px solid #c9a830}
+  .title-bar h1{font-size:109px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#fff;line-height:1}.title-bar .year{color:#c9a830}
+  .title-bar .hosts{font-size:79px;font-weight:700;color:#c9a830;margin-left:80px;letter-spacing:2px;line-height:1}
+  .title-bar .dates{font-size:79px;font-weight:700;color:#eef;margin-left:19px;letter-spacing:2px;line-height:1}
   .title-info{position:absolute;right:30px;bottom:3px;text-align:right;font-size:23px;color:#8899aa;line-height:1.35}
-  .venue-col{position:absolute;top:109px;left:0;z-index:3}
+  .venue-col{position:absolute;top:174px;left:0;z-index:3;border-right:2px solid #c9a830}
   .v-label{display:flex;flex-direction:column;justify-content:center;padding:18px 8px 3px 12px;border-bottom:1px solid rgba(255,255,255,0.04);border-right:2px solid ${P.vColor}}
   .v-label.v-us{background-color:#0f1a38;border-left:4px solid #4a90d9}
   .v-label.v-mx{background-color:#0c1e12;border-left:4px solid #2ecc71}
   .v-label.v-ca{background-color:#1e0c0b;border-left:4px solid #e74c3c}
   .v-city{font-size:41px;font-weight:700;white-space:nowrap}
   .v-stad{font-size:26px;color:#778;white-space:nowrap;overflow:hidden}
-  #grid-area{position:absolute;top:109px;right:0;border-right:2px solid #c9a830}
+  #grid-area{position:absolute;top:174px;right:0;border-right:2px solid #c9a830}
   .month-strip{display:flex;height:26px;position:relative}
   .month-bg{height:26px;border-right:1px solid rgba(255,255,255,0.06)}
   .month-label-abs{position:absolute;top:0;height:26px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#eef;letter-spacing:1px;background:rgba(12,14,30,0.46);border:1.5px solid rgba(201,168,48,0.5);border-radius:2px;pointer-events:none}
@@ -280,6 +280,7 @@ body{background-color:${P.bodyBg}!important;color:${P.textMain}!important}
 .v-label.v-mx{background-color:${P.venueMX}!important}
 .v-label.v-ca{background-color:${P.venueCA}!important}
 .v-label{border-right-color:${P.vColor}!important;border-bottom-color:${P.cellGridline}!important}
+.venue-col{border-right-color:${P.vColor}!important}
 `;
 
 
@@ -375,7 +376,7 @@ const gsEndDay=gsMaxDate%100;
     const infoLine2='All times '+TZ_NAME[TZ]+clockLabel+(tvText?' \u00a0|\u00a0 '+tvText:'');
     tb.innerHTML='<h1>2026 <span class="year">FIFA World Cup</span></h1>'+
       '<div class="hosts"><span style="color:'+P.textHost[0]+'">CANADA</span> <span style="color:'+P.dotColor+'">\u2022</span> <span style="color:'+P.textHost[1]+'">MEXICO</span> <span style="color:'+P.dotColor+'">\u2022</span> <span style="color:'+P.textHost[2]+'">USA</span></div>'+
-      '<div class="dates" style="margin-left:85px">'+datesText+'</div>'+
+      '<div class="dates" style="margin-left:80px">'+datesText+'</div>'+
       '<div class="title-info">48 Teams \u00a0|\u00a0 104 Matches<br>'+infoLine2+'</div>';
   }
 }
@@ -387,7 +388,7 @@ let tW=0;
 const dWts=DD.map(d=>{if(!d)return(tW+=2.2,2.2);const dn=d.getDate(),mo=d.getMonth();if(mo===5&&dn>=gsStartDay&&dn<=gsEndDay)return(tW+=4,4);return(tW+=1.8,1.8)});
 const dW=dWts.map(w=>Math.round(w*GW/tW));
 const moH=26,hdrH=71,stgH=40;
-const gridH=5652-109-moH-hdrH-stgH-grpH;
+const gridH=5652-174-moH-hdrH-stgH-grpH;
 const rowH=Math.floor(gridH/V.length);
 
 function isEv(d,di){if(d)return d.getDate()%2===0;if(di<=0)return DD[1]?(DD[1].getDate()-1)%2===0:false;return DD[di-1]?(DD[di-1].getDate()+1)%2===0:false}
