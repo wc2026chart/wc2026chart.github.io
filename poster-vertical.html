@@ -53,9 +53,14 @@
   .mc-num{font-size:14px;color:#889;flex:1;text-align:center;white-space:nowrap}
   .mc-time{font-size:24px;color:#bbc;white-space:nowrap;margin-left:auto}
   .mc-ko-round{font-size:20px;font-weight:700;color:#c9a830;letter-spacing:0.5px}
-  .mc-ko-num{font-size:24px;font-weight:700;color:#eef}
+  .mc-ko-num{font-size:22px;font-weight:500;color:#889;text-align:center;margin-top:2px}
   .mc-ko-feeder{font-size:24px;font-weight:700;color:#fff}
   .mc-ko-time{font-size:24px;color:#bbc}
+  .mc-ko-boxes{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:0 10px;box-sizing:border-box}
+  .mc-ko-tbox{flex:1;height:43px;border:1.5px solid rgba(200,210,230,0.7);border-radius:3px;background:rgba(245,248,255,0.85)}
+  .mc-ko-feeder-row{display:flex;align-items:center;width:100%;padding:0 10px;box-sizing:border-box}
+  .mc-ko-fl,.mc-ko-fr{flex:1;text-align:center;font-size:24px;font-weight:700;color:#fff}
+  .mc-ko-fv{color:#c9a830;font-size:16px;padding:0 2px;position:relative;top:5px}
   #groups-area{position:absolute;bottom:0;left:0;right:0;background-color:#0a0c1c;border-top:3px solid #c9a830;display:flex;flex-direction:column}
   .groups-title{font-size:48px;font-weight:700;color:#c9a830;text-align:center;padding:18px;letter-spacing:3px;text-transform:uppercase}
   .groups-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;padding:0 10px 2px;flex:1}
@@ -255,7 +260,9 @@ body{background-color:${P.bodyBg}!important;color:${P.textMain}!important}
 .grp-hdr{color:${P.textGold}!important}
 .mc-ko-num{color:${P.koNum}!important}
 .mc-ko-feeder{color:${P.koFeeder}!important}
+.mc-ko-fl,.mc-ko-fr{color:${P.koFeeder}!important}
 .mc-ko-round{color:${P.textGold}!important}
+.mc-ko-fv{color:${P.textGold}!important}
 .mc-ko-time{color:${P.textDim}!important}
 .mc-num{color:${P.textDimmer}!important}
 .mc-time{color:${P.textDim}!important}
@@ -492,7 +499,7 @@ V.forEach(v=>{
         const isKO=['R32','R16','QF','SF','3RD','FIN'].includes(grp);
         const colPx=dW[di];
         let oP,wP;
-        if(isKO){const tw=Math.min(colPx*2.6,140);wP=Math.round(tw/colPx*100);oP=Math.round((wP-100)/2);}
+        if(isKO){const tw=Math.min(colPx*2.6,140);wP=Math.round(tw/colPx*100);oP=Math.round((wP-100)/2);if(num==104)wP+=Math.round(12/colPx*100);}
         else{oP=38;wP=176;}
         const flankW=(oP/wP*100).toFixed(1)+'%';
         const edgeL=flankW,edgeR=((oP+100)/wP*100).toFixed(1)+'%';
@@ -500,10 +507,10 @@ V.forEach(v=>{
         const flanks=`<div class="mc-flank mc-flank-l" style="width:${flankW}"></div><div class="mc-flank mc-flank-r" style="width:${flankW}"></div>`;
         let inner=flanks;
         if(isKO){
-          const rd=KOL[grp]||grp;const hasT=!!t1;const hasF=!!f1;let r3='';
-          if(hasT)r3=`<div class="mc-ko-feeder">${t1} <span style="color:#c9a830">v</span> ${t2}</div>`;
-          if(hasF)r3+=`<div class="mc-ko-feeder" style="${grp==="FIN"?"font-size:22px":""}">${f1} <span style="color:#c9a830">v</span> ${f2}</div>`;
-          inner+=`<div style="flex:1.2"></div><div class="mc-ko-round" style="${grp==="FIN"?"font-size:26px":""}">${rd}</div><div style="height:6px"></div><div class="mc-ko-num">Match #${num}</div><div style="height:6px"></div>${r3}<div style="height:6px"></div><div class="mc-ko-time">${tD}${chan?'·'+chan:''}</div><div style="flex:1"></div>`;
+          const rd=KOL[grp]||grp;const hasT=!!t1;const hasF=!!f1;let r3='';const koShift=['QF','SF','3RD'].includes(grp)?'<div style="height:3px"></div>':'';
+          if(hasT)r3=`<div class="mc-ko-feeder-row"><span class="mc-ko-fl">${t1}</span><span class="mc-ko-fv">v</span><span class="mc-ko-fr">${t2}</span></div>`;
+          if(hasF)r3+=`<div class="mc-ko-feeder-row"><span class="mc-ko-fl">${f1}</span><span class="mc-ko-fv">v</span><span class="mc-ko-fr">${f2}</span></div>`;
+          inner+=`<div class="mc-ko-num">#${num}</div>${koShift}<div style="flex:0.15"></div><div class="mc-ko-round" style="${grp==="FIN"?"font-size:28px":""}">${rd}</div><div style="height:4px"></div>${r3}<div style="height:4px"></div><div class="mc-ko-boxes"><span class="mc-ko-tbox"></span><span class="mc-ko-tbox"></span></div><div style="height:4px"></div><div class="mc-ko-time">${tD}${chan?'·'+chan:''}</div><div style="flex:0.6"></div>`;
         } else {
           inner+=`<div class="mc-grp-top">GROUP ${grp}</div><div class="mc-teams-row"><span class="mc-team-left">${t1}</span><span class="mc-tv">v</span><span class="mc-team-right">${t2}</span></div>
             <div class="mc-flags-row"><div class="mc-flag-wrap"><img class="mc-flag" src="${fU(t1)}" alt="${t1}"></div><div class="mc-flag-wrap"><img class="mc-flag" src="${fU(t2)}" alt="${t2}"></div></div>
@@ -526,7 +533,7 @@ const bracketTop_placeholder=0;// will be set after bracket is built// nudged do
 // Find x position of July 9
 let bracketLeft=0;
 {let px=0;DD.forEach((d,i)=>{if(d&&d.getMonth()===6&&d.getDate()===9)bracketLeft=px;px+=dW[i]})}
-bracketLeft-=18;// nudge left
+bracketLeft-=58;// nudge left (original -18 + 40 for wider bracket)
 
 const brSvg=document.createElementNS('http://www.w3.org/2000/svg','svg');
 // position set after bracket is built
@@ -547,6 +554,15 @@ function bTxt(x,y,str,size,color,anchor){
   t.textContent=str;brSvg.appendChild(t);
 }
 
+function bBox(x,y,w,h){
+  const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  r.setAttribute('x',x);r.setAttribute('y',y-h/2);
+  r.setAttribute('width',w);r.setAttribute('height',h);
+  r.setAttribute('rx','2');r.setAttribute('fill','rgba(245,248,255,0.85)');
+  r.setAttribute('stroke','rgba(200,210,230,0.7)');r.setAttribute('stroke-width','1');
+  brSvg.appendChild(r);
+}
+
 function buildBH(seeds,matches,x0,y0,dir,sfBias){
   const sYs=[];let y=y0;
   for(let i=0;i<seeds.length;i++){
@@ -557,28 +573,36 @@ function buildBH(seeds,matches,x0,y0,dir,sfBias){
     y+=bH;
   }
   let x=x0;
+  const abW=32,abH=20;// advancement box size
+  const bxXOff=dir===1?25:27,bxYOff=dir===1?14:14;// left: 3px down; right: 6px down + 4px left
   for(let i=0;i<seeds.length;i++){
-    if(dir===1){bTxt(x-2,sYs[i],seeds[i],20,bGC,'end');bLn(x,sYs[i],x+bLL,sYs[i]);}
-    else{bTxt(x+2,sYs[i],seeds[i],20,bGC,'start');bLn(x-bLL,sYs[i],x,sYs[i]);}
+    if(dir===1){bTxt(x-2,sYs[i],seeds[i],20,bGC,'end');bLn(x,sYs[i],x+bLL,sYs[i]);bBox(x-68,sYs[i],32,23);}
+    else{bTxt(x+2,sYs[i],seeds[i],20,bGC,'start');bLn(x-bLL,sYs[i],x,sYs[i]);bBox(x+36,sYs[i],32,23);}
   }
   x+=dir*bLL;
   const r32=[];
-  for(let i=0;i<seeds.length;i+=2){const m=(sYs[i]+sYs[i+1])/2;r32.push(m);bLn(x,sYs[i],x,sYs[i+1]);bLn(x,m,x+dir*bLL,m);bTxt(x-dir*11,m,'#'+matches[0][i/2],18,bTC,dir===1?'end':'start');}
+  for(let i=0;i<seeds.length;i+=2){const m=(sYs[i]+sYs[i+1])/2;r32.push(m);bLn(x,sYs[i],x,sYs[i+1]);bLn(x,m,x+dir*bLL,m);bTxt(x-dir*11,m-3,'#'+matches[0][i/2],18,bTC,dir===1?'end':'start');}
   x+=dir*bLL;
   const r16=[];
-  for(let i=0;i<r32.length;i+=2){const m=(r32[i]+r32[i+1])/2;r16.push(m);bLn(x,r32[i],x,r32[i+1]);bLn(x,m,x+dir*bLL,m);bTxt(x-dir*11,m,'#'+matches[1][i/2],18,bTC,dir===1?'end':'start');}
+  for(let i=0;i<r32.length;i+=2){const m=(r32[i]+r32[i+1])/2;r16.push(m);bLn(x,r32[i],x,r32[i+1]);bLn(x,m,x+dir*bLL,m);bTxt(x-dir*11,m-11,'#'+matches[1][i/2],18,bTC,dir===1?'end':'start');
+    bBox(x-dir*bxXOff-abW/2,r32[i]-bxYOff,abW,abH);bBox(x-dir*bxXOff-abW/2,r32[i+1]-bxYOff,abW,abH);}
   x+=dir*bLL;
   const qf=[];
-  for(let i=0;i<r16.length;i+=2){const m=(r16[i]+r16[i+1])/2;qf.push(m);bLn(x,r16[i],x,r16[i+1]);bLn(x,m,x+dir*bLL,m);bTxt(x-dir*11,m,'#'+matches[2][i/2],18,bTC,dir===1?'end':'start');}
+  for(let i=0;i<r16.length;i+=2){const m=(r16[i]+r16[i+1])/2;qf.push(m);bLn(x,r16[i],x,r16[i+1]);bLn(x,m,x+dir*bLL,m);bTxt(x-dir*11,m-11,'#'+matches[2][i/2],18,bTC,dir===1?'end':'start');
+    bBox(x-dir*bxXOff-abW/2,r16[i]-bxYOff,abW,abH);bBox(x-dir*bxXOff-abW/2,r16[i+1]-bxYOff,abW,abH);}
   x+=dir*bLL;
   const sfMid=(qf[0]+qf[1])/2;const sfOut=qf[0]+(qf[1]-qf[0])*sfBias;
   bLn(x,qf[0],x,qf[1]);bLn(x,sfOut,x+dir*bLL*1.2,sfOut);
-  bTxt(x-dir*11,sfMid,'#'+matches[3][0],18,bTC,dir===1?'end':'start');
+  bTxt(x-dir*11,sfMid-3,'#'+matches[3][0],18,bTC,dir===1?'end':'start');
+  bBox(x-dir*bxXOff-abW/2,qf[0]-bxYOff,abW,abH);bBox(x-dir*bxXOff-abW/2,qf[1]-bxYOff,abW,abH);
   x+=dir*bLL*1.2;
+  // Finalist boxes (25% bigger, positioned per side)
+  if(dir===1) bBox(x-50,sfOut-20,40,25);
+  else bBox(x+8,sfOut-20,40,25);
   return{sfY:sfOut,sfX:x,botY:sYs[sYs.length-1]};
 }
 
-const bSeedL=47,bSeedR=554;
+const bSeedL=87,bSeedR=594;
 const bLS=['2A','2B','1F','2C','1C','2F','1E','3rd','2E','2I','1I','3rd','1A','3rd','1L','3rd'];
 const bLM=[[73,76,74,75,77,78,79,80],[89,90,91,92],[97,98],[101]];
 const bRS=['1G','3rd','1D','3rd','1H','2J','2K','2L','1B','3rd','2D','2G','1J','2H','1K','3rd'];
@@ -589,22 +613,27 @@ const bRight=buildBH(bRS,bRM,bSeedR,34,-1,0.75);
 
 const bFinX=(bLeft.sfX+bRight.sfX)/2;
 const bFinY=(bLeft.sfY+bRight.sfY)/2;
-bTxt(bFinX,bFinY-12,'FINAL',22,bGC,'middle');
-bTxt(bFinX,bFinY+10,'Match',18,'#fff','middle');bTxt(bFinX,bFinY+24,'#104',17,'#fff','middle');
-bTxt(bFinX,bFinY+42,'3rd · #103',16,'#778','middle');
+bTxt(bFinX,bFinY-27,'FINAL',22,bGC,'middle');
+bTxt(bFinX,bFinY-5,'Match',18,'#fff','middle');bTxt(bFinX,bFinY+9,'#104',17,'#fff','middle');
+bTxt(bFinX,bFinY+27,'3rd · #103',16,'#778','middle');
+
+// Champion write-in box (at average y of match #80 and #88)
+const champY=bLeft.botY-bH/2;
+bTxt(bFinX,champY-71,'CHAMPION',22,bGC,'middle');
+bBox(bFinX-46,champY-33,88,35);
 
 // Add title
 bTxt(bSeedR/2+bSeedL/2,18,'KNOCKOUT STAGE',28,bGC,'middle');
 
 const bMaxY=bLeft.botY+35;
-brSvg.setAttribute('width',bSeedR+40);
+brSvg.setAttribute('width',bSeedR+80);
 brSvg.setAttribute('height',bMaxY+7);
 brSvg.style.transform='scale(1.265)';brSvg.style.transformOrigin='top left';
-brSvg.setAttribute('viewBox',`0 -7 ${bSeedR+40} ${bMaxY+7}`);
+brSvg.setAttribute('viewBox',`0 -7 ${bSeedR+80} ${bMaxY+7}`);
 // Background rect with border
 const bgRect=document.createElementNS('http://www.w3.org/2000/svg','rect');
 bgRect.setAttribute('x','5');bgRect.setAttribute('y','-7');
-bgRect.setAttribute('width',bSeedR+35);bgRect.setAttribute('height',bMaxY+4);
+bgRect.setAttribute('width',bSeedR+70);bgRect.setAttribute('height',bMaxY+4);
 bgRect.setAttribute('rx','6');bgRect.setAttribute('fill',P.bracketBg);
 bgRect.setAttribute('stroke',P.bracketBorder);bgRect.setAttribute('stroke-width','2.5');
 brSvg.insertBefore(bgRect,brSvg.firstChild);
@@ -619,8 +648,14 @@ ga.appendChild(brSvg);
 // Trophy emoji as HTML div
 const tDiv=document.createElement('div');
 tDiv.innerHTML='&#x1F3C6;';
-tDiv.style.cssText='position:absolute;top:'+(bracketTop+bFinY-52)+'px;left:'+(bracketLeft+bFinX-15)+'px;width:30px;font-size:25px;text-align:center;z-index:6;pointer-events:none';
+tDiv.style.cssText='position:absolute;top:'+(bracketTop+bFinY-67)+'px;left:'+(bracketLeft+bFinX-15)+'px;width:30px;font-size:25px;text-align:center;z-index:6;pointer-events:none';
 ga.appendChild(tDiv);
+
+// Champion trophy emoji
+const cDiv=document.createElement('div');
+cDiv.innerHTML='&#x1F3C6;';
+cDiv.style.cssText='position:absolute;top:'+(bracketTop+champY-105)+'px;left:'+(bracketLeft+bFinX-15)+'px;width:30px;font-size:22px;text-align:center;z-index:6;pointer-events:none';
+ga.appendChild(cDiv);
 
 
 const gA=document.getElementById('groups-area');
@@ -660,18 +695,17 @@ function svgBracketToCanvas(svgEl){
   ctx.scale(scaleF,scaleF);
   ctx.translate(-vb[0],-vb[1]);
   function drawRoundRect(cx,x,y,w,h,r){cx.beginPath();if(cx.roundRect){cx.roundRect(x,y,w,h,r)}else{cx.moveTo(x+r,y);cx.lineTo(x+w-r,y);cx.quadraticCurveTo(x+w,y,x+w,y+r);cx.lineTo(x+w,y+h-r);cx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);cx.lineTo(x+r,y+h);cx.quadraticCurveTo(x,y+h,x,y+h-r);cx.lineTo(x,y+r);cx.quadraticCurveTo(x,y,x+r,y)}cx.closePath()}
-  const rect=svgEl.querySelector('rect');
-  if(rect){
+  svgEl.querySelectorAll('rect').forEach(rect=>{
     const rx=parseFloat(rect.getAttribute('rx'))||0;
     const x=parseFloat(rect.getAttribute('x'));
     const y=parseFloat(rect.getAttribute('y'));
     const rw=parseFloat(rect.getAttribute('width'));
     const rh=parseFloat(rect.getAttribute('height'));
     ctx.fillStyle=rect.getAttribute('fill');
-    ctx.strokeStyle=rect.getAttribute('stroke');
-    ctx.lineWidth=parseFloat(rect.getAttribute('stroke-width'));
-    ctx.beginPath();drawRoundRect(ctx,x,y,rw,rh,rx);ctx.fill();ctx.stroke();
-  }
+    ctx.strokeStyle=rect.getAttribute('stroke')||'transparent';
+    ctx.lineWidth=parseFloat(rect.getAttribute('stroke-width'))||0;
+    ctx.beginPath();drawRoundRect(ctx,x,y,rw,rh,rx);ctx.fill();if(ctx.lineWidth>0)ctx.stroke();
+  });
   svgEl.querySelectorAll('line').forEach(ln=>{
     ctx.beginPath();
     ctx.moveTo(parseFloat(ln.getAttribute('x1')),parseFloat(ln.getAttribute('y1')));

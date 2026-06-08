@@ -6,6 +6,9 @@
 <title>2026 FIFA World Cup Wall Chart</title>
 <meta name="description" content="Free printable 2026 FIFA World Cup schedule poster. All 104 matches, knockout bracket, and group standings in your timezone. Download as PDF or print-ready HTML.">
 <!-- Social sharing tags -->
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:title" content="2026 FIFA World Cup Wall Chart">
 <meta property="og:description" content="Free printable schedule poster with all 104 matches, knockout bracket &amp; group standings in your timezone.">
@@ -35,10 +38,6 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 .config-group label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--gold);font-weight:600;margin-bottom:10px}
 .config-group select{width:100%;padding:11px 14px;background:var(--bg);color:var(--text);border:1px solid var(--card-border);border-radius:7px;font-family:'Outfit',sans-serif;font-size:15px;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238890aa' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
 .config-group select:focus{outline:none;border-color:var(--gold)}
-
-.info-bar{background:var(--card);border:1px solid var(--card-border);border-radius:10px;padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.tag{font-family:'Space Mono',monospace;font-size:12px;padding:3px 9px;border-radius:4px;background:rgba(201,168,48,0.12);color:var(--gold);border:1px solid rgba(201,168,48,0.2)}
-.info-text{font-size:14px;color:var(--text-dim);flex:1}
 
 .actions{text-align:center;margin-bottom:30px;display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border:none;border-radius:9px;font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;letter-spacing:0.5px;cursor:pointer;text-decoration:none;transition:transform 0.15s,box-shadow 0.15s}
@@ -139,14 +138,6 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
     </div>
   </div>
 
-  <div class="info-bar">
-    <span class="tag" id="tag-tv">FOX / FS1</span>
-    <span class="tag" id="tag-fmt">MM/DD</span>
-    <span class="tag">300 DPI</span>
-    <span class="info-text" id="info-text">US broadcast channels included. Print on Letter paper, landscape, scale to fit, enable background graphics.</span>
-  </div>
-</div>
-
 <div class="actions">
   <a class="btn btn-gold" id="btn-open" href="#" target="_blank">↗ Open Poster</a>
   <button class="btn btn-outline" id="btn-print" onclick="printPoster()">🖨 Print</button>
@@ -196,29 +187,16 @@ function update() {
   document.getElementById('btn-open').href = url;
   document.getElementById('btn-download').href = 'poster.html';
   
-  const tvTag = document.getElementById('tag-tv');
-  const fmtTag = document.getElementById('tag-fmt');
-  const info = document.getElementById('info-text');
-  
   const usZones = ['ET','CT','MT','PT'];
   if (usZones.includes(p.tz)) {
-    tvTag.textContent = 'FOX / FS1';
-    fmtTag.textContent = 'MM/DD';
     document.getElementById('clock-toggle').style.display='none';
     document.getElementById('sel-clock').value='12';
-    info.textContent = 'US broadcast channels included. Print on Letter paper, landscape, scale to fit, enable background graphics.';
   } else if (p.tz === 'BST') {
-    tvTag.textContent = 'BBC / ITV';
-    fmtTag.textContent = 'DD/MM';
     document.getElementById('clock-toggle').style.display='none';
     document.getElementById('sel-clock').value='12';
-    info.textContent = 'UK broadcast channels (group stage confirmed, knockout TBC). Dates in DD/MM format.';
   } else {
-    tvTag.textContent = 'Times only';
-    fmtTag.textContent = 'DD/MM';
     document.getElementById('clock-toggle').style.display='block';
     if (p.tz !== _prevTZ) document.getElementById('sel-clock').value='24';
-    info.textContent = 'Dates in ' + fmtTag.textContent + ' format. Print on landscape, scale to fit, enable background graphics.';
   }
   
   const iframe = document.getElementById('preview');
