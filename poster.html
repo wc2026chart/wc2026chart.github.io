@@ -431,14 +431,11 @@ const gsStartDay=gsMinDate%100;
 
 const gsEndMo=Math.floor(gsMaxDate/100);
 const gsEndDay=gsMaxDate%100;
-// Check if match 72 (JOR-ARG, Dallas) and 78 (R32, Dallas) overlap due to timezone shift
-const m72date=M.find(m=>m[0]===72),m78date=M.find(m=>m[0]===78);
-let widenFirstKO='';
-if(m72date&&m78date){const[a1,a2]=m72date[1].split('/').map(Number);const[b1,b2]=m78date[1].split('/').map(Number);if(b1*100+b2-(a1*100+a2)<=2){
-  let firstR32day='';M.forEach(m=>{if(m[5]==='R32'){const[mo,dy]=m[1].split('/').map(Number);const dn=mo*100+dy;if(!firstR32day||dn<firstR32day)firstR32day=dn}});
-  if(firstR32day)widenFirstKO=(Math.floor(firstR32day/100))+'/'+(firstR32day%100);
-}}
-const dWts=DD.map(d=>{if(!d)return(tW+=2.2,2.2);const dn=d.getDate(),mo=d.getMonth();const dk=(mo+1)+'/'+dn;if(mo===5&&dn>=gsStartDay&&dn<=gsEndDay)return(tW+=4,4);if(dk===widenFirstKO)return(tW+=4,4);return(tW+=1.8,1.8)});
+// If match 72 and 78 are only 2 days apart, widen the day in between
+const m72=M.find(m=>m[0]===72),m78=M.find(m=>m[0]===78);
+let widenDay='';
+if(m72&&m78){const[a1,a2]=m72[1].split('/').map(Number);const[b1,b2]=m78[1].split('/').map(Number);const diff=(b1*100+b2)-(a1*100+a2);if(diff===2)widenDay=a1+'/'+(a2+1)}
+const dWts=DD.map(d=>{if(!d)return(tW+=2.2,2.2);const dn=d.getDate(),mo=d.getMonth();const dk=(mo+1)+'/'+dn;if(mo===5&&dn>=gsStartDay&&dn<=gsEndDay)return(tW+=4,4);if(dk===widenDay)return(tW+=4,4);return(tW+=1.8,1.8)});
 const dW=dWts.map(w=>Math.round(w*GW/tW));
 const moH=26,hdrH=71,stgH=40;
 const gridH=2512-109-moH-hdrH-stgH-grpH;
