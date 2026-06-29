@@ -49,6 +49,7 @@
   .mc-botline{display:flex;align-items:baseline;width:100%;padding:0 3px 1px;line-height:1;margin-top:-3px}
   .mc-grp{font-size:18px;font-weight:700;color:#c9a830;white-space:nowrap}
   .mc-num{font-size:14px;color:#889;flex:1;text-align:center;white-space:nowrap}
+  .mc-num-ko{font-size:15px;color:#fff;flex:1;text-align:center;white-space:nowrap}
   .mc-time{font-size:18px;color:#bbc;white-space:nowrap}
   .mc-ko-round{font-size:18px;font-weight:700;color:#c9a830;letter-spacing:0.5px}
   .mc-ko-num{font-size:18px;font-weight:700;color:#eef}
@@ -317,6 +318,7 @@ body{background-color:${P.bodyBg}!important;color:${P.textMain}!important}
 .mc-tv{color:${P.textGold}!important}
 .mc-grp{color:${P.textGold}!important}
 .mc-num{color:${P.textDimmer}!important}
+.mc-num-ko{color:${P.textMain}!important}
 .mc-time{color:${P.textDim}!important}
 .mc-ko-round{color:${P.textGold}!important}
 .mc-ko-num{color:${P.koNum}!important}
@@ -488,7 +490,7 @@ const dWts=DD.map(d=>{if(!d)return(tW+=2.2,2.2);const dn=d.getDate(),mo=d.getMon
 const favDates=new Set();
 const favVenueDates=new Set();
 const favGroups=new Set();
-if(hasFav){Object.entries(GROUPS).forEach(([g,teams])=>{teams.forEach(([iso,ab])=>{if(FAV.has(ab))favGroups.add(g)})});M.forEach(m=>{if(m[5]!=='R32'&&m[5]!=='R16'&&m[5]!=='QF'&&m[5]!=='SF'&&m[5]!=='3RD'&&m[5]!=='FIN'){if(FAV.has(m[3])||FAV.has(m[4])){favDates.add(m[1]);favVenueDates.add(m[6]+'_'+m[1])}}})}
+if(hasFav){Object.entries(GROUPS).forEach(([g,teams])=>{teams.forEach(([iso,ab])=>{if(FAV.has(ab))favGroups.add(g)})});M.forEach(m=>{if(FAV.has(m[3])||FAV.has(m[4])){favDates.add(m[1]);favVenueDates.add(m[6]+'_'+m[1])}})}
 const dW=dWts.map(w=>Math.round(w*GW/tW));
 const moH=26,hdrH=71,stgH=40;
 const gridH=2512-109-moH-hdrH-stgH-grpH;
@@ -646,7 +648,7 @@ V.forEach((v,vi)=>{
           const top=(c,on,cls)=>`<span class="${cls}${hasFav&&on&&FAV.has(c)?' mc-team-fav':''}">${on?c:''}</span>`;
           inner+=`<div class="mc-teams-row">${top(a,aTeam,'mc-team-left')}<span class="mc-tv">v</span>${top(b,bTeam,'mc-team-right')}</div>
             <div class="mc-flags-row">${flag(a,aTeam)}${flag(b,bTeam)}</div>
-            <div class="mc-botline"><span class="mc-grp">${lbl}</span><span class="mc-num">#${num}</span><span class="mc-time">${tD}${showChan&&chan?'·'+chan:''}</span></div>`;
+            <div class="mc-botline"><span class="mc-grp">${lbl}</span><span class="${isKO?'mc-num-ko':'mc-num'}">#${num}</span><span class="mc-time">${tD}${showChan&&chan?'·'+chan:''}</span></div>`;
         }
         gh+=`<div class="mc${hasFav&&(FAV.has(t1)||FAV.has(t2))?' fav':''}" style="left:-${oP}%;width:${wP}%;background-color:${bg};z-index:5;overflow:hidden">${inner}</div>`;
       });
@@ -674,18 +676,19 @@ const bLC=P.bracketLine,bTC=P.bracketText,bGC=P.bracketGold;
 const bH=38.5,bLL=60,bLL0=48,bGap=11,bBigGap=8,bWithin=3;// ~+10% vertical / +15% horizontal vs original, to fit team flags
 const svgNS='http://www.w3.org/2000/svg';
 const Mby={};M.forEach(m=>Mby[m[0]]=m);
+const NM={};Object.values(GROUPS).forEach(a=>a.forEach(t=>NM[t[1]]=t[2]));// team code -> full name
 const bTeam=(num,side)=>{const m=Mby[num];if(!m)return null;const c=side===1?m[3]:m[4];return TEAMS.has(c)?c:null};
 const bWin=num=>{const w=RESULTS[num];return(w&&TEAMS.has(w))?w:null};
-function bChip(cx,cyFlag,code,flagW,codeSize){
+function bChip(cx,cyFlag,code,flagW,codeSize,label,gap){
   const fh=Math.round(flagW*2/3);
   const img=document.createElementNS(svgNS,'image');
   img.setAttribute('href',fU(code));img.setAttributeNS('http://www.w3.org/1999/xlink','href',fU(code));
   img.setAttribute('x',cx-flagW/2);img.setAttribute('y',cyFlag-fh/2);img.setAttribute('width',flagW);img.setAttribute('height',fh);
   img.setAttribute('preserveAspectRatio','xMidYMid meet');brSvg.appendChild(img);
   const t=document.createElementNS(svgNS,'text');
-  t.setAttribute('x',cx);t.setAttribute('y',cyFlag-fh/2-0.5);t.setAttribute('font-size',codeSize);
+  t.setAttribute('x',cx);t.setAttribute('y',cyFlag-fh/2-(gap||0.5));t.setAttribute('font-size',codeSize);
   t.setAttribute('fill',P.textMain);t.setAttribute('font-weight','700');t.setAttribute('text-anchor','middle');
-  t.setAttribute('font-family','Roboto,sans-serif');t.textContent=code;brSvg.appendChild(t);
+  t.setAttribute('font-family','Roboto,sans-serif');t.textContent=label||code;brSvg.appendChild(t);
 }
 function refBotY(bh,bg,bb,y0){let y=y0,last=y0;for(let i=0;i<16;i++){last=y;if(i%2===1&&i<15)y+=bh*0.3;if(i%4===3&&i<15)y+=bg;if(i%8===7&&i<15)y+=bb;y+=bh}return last}
 
@@ -761,13 +764,17 @@ const bFinY=(bLeft.sfY+bRight.sfY)/2;
 bTxt(bFinX,bFinY-12,'FINAL',20,bGC,'middle');
 bTxt(bFinX,bFinY+10,'Match',16,P.koFeeder,'middle');bTxt(bFinX,bFinY+24,'#104',15,P.koFeeder,'middle');
 bTxt(bFinX,bFinY+42,'3rd · #103',14,'#778','middle');
-const bChamp=bWin(104);if(bChamp)bChip(bFinX,bFinY-40,bChamp,58.8,22.75);
 const bThird=bWin(103);if(bThird)bChip(bFinX,bFinY+64,bThird,35.28,15.75);
 
 // Add title
 bTxt(bSeedR/2+bSeedL/2,18,LANG==='es'?'FASE ELIMINATORIA':'KNOCKOUT STAGE',26,bGC,'middle');
 
 const bMaxY=bLeft.botY+35;
+// Champion showcase — bottom center: flag+code sit above a line, 'CHAMPION' beneath it
+const champLineY=bMaxY-46, champHW=56;
+bLn(bFinX-champHW,champLineY,bFinX+champHW,champLineY);
+const bChamp=bWin(104);
+if(bChamp){const cfW=74.382,cfh=Math.round(cfW*2/3);bChip(bFinX,champLineY-6-cfh/2,bChamp,cfW,23.625,(t_team(NM[bChamp])||bChamp).toUpperCase(),3.5);}// flag 1.5x+15%; full country name instead of code
 const bSc=SZ.w/3768;// per-size bracket scale: 24x16=1.0, A3≈0.943, Letter(22x17)≈0.876
 brSvg.setAttribute('width',(bSeedR+54)*bSc);
 brSvg.setAttribute('height',(bMaxY+7)*bSc);
@@ -793,6 +800,11 @@ const tDiv=document.createElement('div');
 tDiv.innerHTML='&#x1F3C6;';
 tDiv.style.cssText='position:absolute;top:'+(bracketTop+(bFinY-52)*bSc)+'px;left:'+(bracketLeft+(bFinX-15)*bSc)+'px;width:'+(30*bSc)+'px;font-size:'+(25*bSc)+'px;text-align:center;z-index:6;pointer-events:none';
 ga.appendChild(tDiv);
+// Champion label: trophy + word, centered under the champion line (HTML div = color trophy)
+const champDiv=document.createElement('div');
+champDiv.innerHTML='&#x1F3C6; '+(LANG==='es'?'CAMPE\u00d3N':'CHAMPION');
+champDiv.style.cssText='position:absolute;top:'+(bracketTop+(champLineY+4)*bSc)+'px;left:'+bracketLeft+'px;width:'+((bSeedR+54)*bSc)+'px;text-align:center;font-size:'+(22.5*bSc)+'px;font-weight:700;color:'+P.bracketGold+';font-family:Roboto,sans-serif;z-index:6;pointer-events:none';
+ga.appendChild(champDiv);
 
 
 const gA=document.getElementById('groups-area');
