@@ -479,11 +479,14 @@ const gsStartDay=gsMinDate%100;
 
 const gsEndMo=Math.floor(gsMaxDate/100);
 const gsEndDay=gsMaxDate%100;
-// (removed) old special-case that widened the day between the last group match and R32 — unneeded now that KO columns are 2.8 wide (was causing over-wide columns in some timezones)
+// If the last group match (#72) and R32 #78 are only 2 days apart, widen the empty day between to group-stage width
+const m72=M.find(m=>m[0]===72),m78=M.find(m=>m[0]===78);
+let widenDay='';
+if(m72&&m78){const[a1,a2]=m72[1].split('/').map(Number);const[b1,b2]=m78[1].split('/').map(Number);const diff=(b1*100+b2)-(a1*100+a2);if(diff===2)widenDay=a1+'/'+(a2+1)}
 // KO match days get a wider column than other off-days (but less than GS's 4, to protect GS)
 const koDates=new Set();M.forEach(m=>{if(['R32','R16','QF','SF','3RD','FIN'].includes(m[5]))koDates.add(m[1])});
 const KO_W=2.8;
-const dWts=DD.map(d=>{if(!d)return(tW+=2.2,2.2);const dn=d.getDate(),mo=d.getMonth();const dk=(mo+1)+'/'+dn;if(mo===5&&dn>=gsStartDay&&dn<=gsEndDay)return(tW+=4,4);if(koDates.has(dk))return(tW+=KO_W,KO_W);return(tW+=1.8,1.8)});
+const dWts=DD.map(d=>{if(!d)return(tW+=2.2,2.2);const dn=d.getDate(),mo=d.getMonth();const dk=(mo+1)+'/'+dn;if(mo===5&&dn>=gsStartDay&&dn<=gsEndDay)return(tW+=4,4);if(dk===widenDay)return(tW+=4,4);if(koDates.has(dk))return(tW+=KO_W,KO_W);return(tW+=1.8,1.8)});
 const favDates=new Set();
 const favVenueDates=new Set();
 const favGroups=new Set();
@@ -624,7 +627,7 @@ V.forEach((v,vi)=>{
         const s1code=s1team?t1:(t1||f1||'?'),s2code=s2team?t2:(t2||f2||'?');
         const colPx=dW[di];
         let oP,wP;
-        if(isKO){wP=SZ.cellKO;oP=Math.round((wP-100)/2);}// no px cap: KO cells render near GS width
+        if(isKO){const koColPx=Math.round(KO_W*GW/tW);const cap=colPx>koColPx?koColPx/colPx:1;wP=SZ.cellKO*cap;oP=Math.round((wP-100)/2);}// on overlap days the column is GS-width; keep the KO cell at normal KO pixel width
         else{oP=SZ.cellGSo;wP=SZ.cellGS;}
         const flankW=(oP/wP*100).toFixed(1)+'%';
         const tD=fmt24((time.includes(':')&&chan)?time.replace(/[ap]$/,''):time);
