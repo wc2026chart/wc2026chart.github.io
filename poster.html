@@ -45,8 +45,9 @@
   .mc-flag-wrap{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .mc-teams-row{display:flex;align-items:center;width:100%;padding:0}
   .mc-team-left,.mc-team-right{flex:1;font-size:26px;font-weight:700;text-align:center}
-  .mc-score{font-size:17px;font-weight:700;margin-left:6px}
-  .gm-score{font-size:15px;font-weight:700;margin-left:4px}
+  .mc-score{font-size:17px;font-weight:700;margin-left:3.6px;position:relative;top:-3px}
+  .gm-score{font-size:15px;font-weight:700;margin-left:2.4px}
+  .mc-team-left.has-sc,.mc-team-right.has-sc{position:relative;left:4px}
   .mc-tv{font-size:16px;color:#c9a830;text-align:center;font-weight:700}
   .mc-botline{display:flex;align-items:baseline;width:100%;padding:0 3px 1px;line-height:1;margin-top:-3px}
   .mc-grp{font-size:18px;font-weight:700;color:#c9a830;white-space:nowrap}
@@ -661,7 +662,7 @@ V.forEach((v,vi)=>{
           const lbl=isKO?(RT[grp]||grp):((LANG==='es'?'GRUPO':'GROUP')+' '+grp);
           const flag=(c,on)=>on?`<div class="mc-flag-wrap"><img class="mc-flag" src="${fU(c)}" alt="${c}"></div>`:`<div class="mc-flag-wrap"><span class="mc-ko-tbd">${c}</span></div>`;
           const SC=scOf(num,a,b);
-          const top=(c,on,cls,i)=>`<span class="${cls}${hasFav&&on&&FAV.has(c)?' mc-team-fav':''}">${on?c:''}${on&&SC?`<span class="mc-score" style="color:${i?SC.cb:SC.ca}">${i?SC.b:SC.a}</span>`:''}</span>`;
+          const top=(c,on,cls,i)=>`<span class="${cls}${on&&SC?' has-sc':''}${hasFav&&on&&FAV.has(c)?' mc-team-fav':''}">${on?c:''}${on&&SC?`<span class="mc-score" style="color:${i?SC.cb:SC.ca}">${i?SC.b:SC.a}</span>`:''}</span>`;
           inner+=`<div class="mc-teams-row">${top(a,aTeam,'mc-team-left',0)}<span class="mc-tv">v</span>${top(b,bTeam,'mc-team-right',1)}</div>
             <div class="mc-flags-row">${flag(a,aTeam)}${flag(b,bTeam)}</div>
             <div class="mc-botline"><span class="mc-grp" style="${grp==="R32"||grp==="R16"?"font-size:20px":""}">${lbl}</span><span class="${isKO?'mc-num-ko':'mc-num'}">#${num}</span><span class="mc-time">${tD}${showChan&&chan?'·'+chan:''}</span></div>`;
@@ -706,8 +707,9 @@ function bChip(cx,cyFlag,code,flagW,codeSize,label,gap,sc){
   t.setAttribute('fill',P.textMain);t.setAttribute('font-weight','700');t.setAttribute('text-anchor','middle');
   t.setAttribute('font-family','Roboto,sans-serif');
   const ts=document.createElementNS(svgNS,'tspan');ts.textContent=label||code;t.appendChild(ts);
-  if(sc){const sp=document.createElementNS(svgNS,'tspan');sp.textContent=' '+sc.v;
-    sp.setAttribute('fill',sc.c);sp.setAttribute('font-size',(codeSize*2/3).toFixed(2));t.appendChild(sp);}
+  if(sc){const sp=document.createElementNS(svgNS,'tspan');sp.textContent=sc.v;
+    sp.setAttribute('dx',(codeSize*0.1).toFixed(2));// explicit gap = 60% of the old space character
+    sp.setAttribute('fill',sc.c);sp.setAttribute('font-size',(codeSize*0.8).toFixed(2));t.appendChild(sp);}
   brSvg.appendChild(t);
 }
 function refBotY(bh,bg,bb,y0){let y=y0,last=y0;for(let i=0;i<16;i++){last=y;if(i%2===1&&i<15)y+=bh*0.3;if(i%4===3&&i<15)y+=bg;if(i%8===7&&i<15)y+=bb;y+=bh}return last}
@@ -755,7 +757,8 @@ function buildBH(seeds,matches,x0,y0,dir,sfBias){
       const w=bWin(matches[ri][i/2]);
       const wb=ri>=1?bWin(matches[ri-1][i+1]):null;// lower feeder's winner = the chip that sits below this number
       bTxt(x-dir*20,(prev[i]+prev[i+1])/2+(wb?[0,-0.2,-0.1][ri]:0)*(prev[i+1]-prev[i]),'#'+matches[ri][i/2],13,bTC,dir===1?'end':'start');// centered; nudged up only when the lower feeder's chip is present below it
-      if(w)bChip(x+dir*bLL/2,m-16,w,43.12,15.75,null,null,scSide(matches[ri][i/2],w));
+      const nxtM=matches[ri+1]?matches[ri+1][Math.floor(i/4)]:null;// the match this winner goes ON to play
+      if(w)bChip(x+dir*bLL/2,m-16,w,43.12,15.75,null,null,nxtM?scSide(nxtM,w):null);
     }
     x+=dir*bLL;return nxt;
   };
@@ -767,7 +770,7 @@ function buildBH(seeds,matches,x0,y0,dir,sfBias){
   bLn(x,qf[0],x,qf[1]);bLn(x,sfOut,x+dir*bLL*1.2,sfOut);
   bTxt(x-dir*20,sfMid,'#'+matches[3][0],13,bTC,dir===1?'end':'start');
   const wsf=bWin(matches[3][0]);
-  if(wsf)bChip(x+dir*bLL*1.2/2,sfOut-16,wsf,43.12,15.75,null,null,scSide(matches[3][0],wsf));
+  if(wsf)bChip(x+dir*bLL*1.2/2,sfOut-16,wsf,43.12,15.75,null,null,scSide(104,wsf));// finalist -> score in the final
   x+=dir*bLL*1.2;
   return{sfY:sfOut,sfX:x,botY:sYs[sYs.length-1]};
 }
@@ -916,13 +919,14 @@ async function svgBracketToCanvas(svgEl){
       // laying them out left-to-right and applying the anchor to the combined width.
       const parts=spans.map(sp=>({t:sp.textContent,
         f:sp.getAttribute('fill')||fill,
-        z:parseFloat(sp.getAttribute('font-size'))||fs}));
+        z:parseFloat(sp.getAttribute('font-size'))||fs,
+        dx:parseFloat(sp.getAttribute('dx'))||0}));
       let total=0;
-      parts.forEach(p=>{ctx.font=fw+' '+p.z+'px Roboto,sans-serif';total+=ctx.measureText(p.t).width});
+      parts.forEach(p=>{ctx.font=fw+' '+p.z+'px Roboto,sans-serif';total+=p.dx+ctx.measureText(p.t).width});
       let cx2=anchor==='middle'?x-total/2:anchor==='end'?x-total:x;
       ctx.textAlign='left';
       parts.forEach(p=>{ctx.font=fw+' '+p.z+'px Roboto,sans-serif';ctx.fillStyle=p.f;
-        ctx.fillText(p.t,cx2,y);cx2+=ctx.measureText(p.t).width});
+        cx2+=p.dx;ctx.fillText(p.t,cx2,y);cx2+=ctx.measureText(p.t).width});
     } else {
       ctx.font=fw+' '+fs+'px Roboto,sans-serif';
       ctx.fillStyle=fill;
