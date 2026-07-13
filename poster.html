@@ -486,7 +486,8 @@ if(m72&&m78){const[a1,a2]=m72[1].split('/').map(Number);const[b1,b2]=m78[1].spli
 // KO match days get a wider column than other off-days (but less than GS's 4, to protect GS)
 const koDates=new Set();M.forEach(m=>{if(['R32','R16','QF','SF','3RD','FIN'].includes(m[5]))koDates.add(m[1])});
 const KO_W=2.8;
-const dWts=DD.map(d=>{if(!d)return(tW+=2.2,2.2);const dn=d.getDate(),mo=d.getMonth();const dk=(mo+1)+'/'+dn;if(mo===5&&dn>=gsStartDay&&dn<=gsEndDay)return(tW+=4,4);if(dk===widenDay)return(tW+=4,4);if(koDates.has(dk))return(tW+=KO_W,KO_W);return(tW+=1.8,1.8)});
+const OFF_W=(1.8+KO_W)/2;// off-days: midway between their old width and the KO width
+const dWts=DD.map(d=>{if(!d)return(tW+=2.2,2.2);const dn=d.getDate(),mo=d.getMonth();const dk=(mo+1)+'/'+dn;if(mo===5&&dn>=gsStartDay&&dn<=gsEndDay)return(tW+=4,4);if(dk===widenDay)return(tW+=4,4);if(koDates.has(dk))return(tW+=KO_W,KO_W);return(tW+=OFF_W,OFF_W)});
 const favDates=new Set();
 const favVenueDates=new Set();
 const favGroups=new Set();
@@ -567,12 +568,8 @@ stageOrder.forEach(([key,label])=>{
   }
   stgData.push({s:startPx,e:endPx,label,_maxMo:r.maxMo,_maxDy:r.maxDy});
 });
-stgData.forEach(({s,e,label},idx)=>{const w=e-s;
-  const prevEnd=idx>0?stgData[idx-1].e:0;
-  const nextStart=idx<stgData.length-1?stgData[idx+1].s:Infinity;
-  const padL=(w<250&&s-prevEnd>4)?8:0;
-  const padR=(w<250&&nextStart-e>4)?8:0;
-  stg+=`<div class="stage-label-abs" style="left:${s-padL}px;width:${w+padL+padR}px">${label}</div>`});
+stgData.forEach(({s,e,label})=>{const w=e-s;
+  stg+=`<div class="stage-label-abs" style="left:${s}px;width:${w}px">${label}</div>`});// labels stay within their own day span
 
 // OFF days: find gaps between stages
 const allMatchDates=new Set();M.forEach(m=>allMatchDates.add(m[1]));
@@ -730,7 +727,7 @@ function buildBH(seeds,matches,x0,y0,dir,sfBias){
   const drawRound=(prev,ri)=>{
     const nxt=[];
     for(let i=0;i<prev.length;i+=2){
-      const m=(prev[i]+prev[i+1])/2+([8,10,6][ri]||0);nxt.push(m);// per-round absolute drop, propagates
+      const m=(prev[i]+prev[i+1])/2+([8,0,6][ri]||0);nxt.push(m);// R16 lines drop 8 (R32 flags sit level with their lines); QF lines centered; SF drop 6
       bLn(x,prev[i],x,prev[i+1]);bLn(x,m,x+dir*bLL,m);
       const w=bWin(matches[ri][i/2]);
       const wb=ri>=1?bWin(matches[ri-1][i+1]):null;// lower feeder's winner = the chip that sits below this number
