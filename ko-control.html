@@ -21,6 +21,9 @@
   .vs .tbd{color:var(--dim);font-style:italic}
   select{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:150px;font:inherit}
   select:disabled{opacity:.4}
+  input.sc{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 4px;width:44px;text-align:center;font:inherit}
+  input.sc:disabled{opacity:.4}
+  .scwrap{display:flex;align-items:center;gap:4px;color:var(--dim)}
   .tick{width:18px;flex:none;color:var(--green);font-weight:700;text-align:center}
   .out{margin-top:26px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
   .out h2{font-size:14px;margin:0 0 10px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
@@ -99,6 +102,9 @@ const BYN={}; BR.forEach(m=>BYN[m.n]=m);
 
 // Known result baked into the poster as the starting point.
 let picks=Object.assign({73:'CAN'}, (window.WC_RESULTS||{}));
+// All scores, group stage included. Only knockout scores are editable below;
+// the group-stage ones ride along untouched so publishing never wipes them.
+let scores=Object.assign({}, (window.WC_SCORES||{}));
 
 // Resolve every match's two participants from the current picks.
 function resolve(){
@@ -136,6 +142,7 @@ function render(){
     const [a,b]=part[m.n];
     const ready=!!a && !!b;
     const win=picks[m.n];
+    const sc=scores[m.n];
     let opts=`<option value="">— winner —</option>`;
     if(ready){
       opts+=`<option value="${a}"${win===a?' selected':''}>${NAME[a]||a}</option>`;
@@ -149,6 +156,7 @@ function render(){
     html+=`<div class="m${win?' done':''}">
       <div class="mn">#${m.n}</div>
       <div class="vs">${txt}</div>
+      <div class="scwrap"><input class="sc" type="number" min="0" step="1" data-n="${m.n}" data-i="0" value="${sc&&sc[0]!=null?sc[0]:''}"${ready?'':' disabled'}>–<input class="sc" type="number" min="0" step="1" data-n="${m.n}" data-i="1" value="${sc&&sc[1]!=null?sc[1]:''}"${ready?'':' disabled'}></div>
       <select data-n="${m.n}"${ready?'':' disabled'}>${opts}</select>
       <div class="tick">${win?'✓':''}</div>
     </div>`;
@@ -158,6 +166,13 @@ function render(){
     const n=+s.dataset.n, v=s.value;
     if(v) picks[n]=v; else delete picks[n];
     render();
+  });
+  board.querySelectorAll('input.sc').forEach(inp=>inp.oninput=()=>{
+    const n=+inp.dataset.n, i=+inp.dataset.i;
+    const cur=scores[n]||[null,null];
+    cur[i] = inp.value===''?null:Math.max(0,parseInt(inp.value,10)||0);
+    if(cur[0]==null&&cur[1]==null) delete scores[n]; else scores[n]=cur;
+    updateOut();// no re-render: keeps focus in the box you're typing in
   });
   updateOut();
 }
@@ -171,8 +186,12 @@ function updateOut(){
   document.getElementById('url').value=url;
   document.getElementById('open').href=url;
   const lit='{'+Object.keys(picks).map(Number).sort((x,y)=>x-y).map(n=>n+":'"+picks[n]+"'").join(',')+'}';
-  window._resultsJS='// WC2026 knockout results — match number : winning team code.\nwindow.WC_RESULTS = '+lit+';\n';
-  document.getElementById('lit').textContent='window.WC_RESULTS = '+lit+';';
+  const done=Object.keys(scores).filter(n=>scores[n]&&scores[n][0]!=null&&scores[n][1]!=null).map(Number).sort((x,y)=>x-y);
+  const slit='{'+done.map(n=>n+':['+scores[n][0]+','+scores[n][1]+']').join(',')+'}';
+  const js='// WC2026 results — match number : advancing team code / [team1 goals, team2 goals].\n'
+    +'window.WC_RESULTS = '+lit+';\n\nwindow.WC_SCORES = '+slit+';\n';
+  window._resultsJS=js;
+  document.getElementById('lit').textContent='window.WC_RESULTS = '+lit+';\n\nwindow.WC_SCORES = '+slit+';';
 }
 document.getElementById('dl').onclick=()=>{
   const blob=new Blob([window._resultsJS],{type:'text/javascript'});
