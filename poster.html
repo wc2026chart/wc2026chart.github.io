@@ -46,7 +46,7 @@
   .mc-teams-row{display:flex;align-items:center;width:100%;padding:0}
   .mc-team-left,.mc-team-right{flex:1;font-size:26px;font-weight:700;text-align:center}
   .mc-score{font-size:17px;font-weight:700;margin-left:3.6px;position:relative;top:-3px}
-  .gm-score{font-size:15px;font-weight:700;margin-left:2.4px}
+  .gm-score{font-size:15px;font-weight:700;margin-left:2.4px;position:relative;top:-2px}
   .mc-team-left.has-sc,.mc-team-right.has-sc{position:relative;left:4px}
   .mc-tv{font-size:16px;color:#c9a830;text-align:center;font-weight:700}
   .mc-botline{display:flex;align-items:baseline;width:100%;padding:0 3px 1px;line-height:1;margin-top:-3px}
@@ -708,7 +708,7 @@ function bChip(cx,cyFlag,code,flagW,codeSize,label,gap,sc){
   t.setAttribute('font-family','Roboto,sans-serif');
   const ts=document.createElementNS(svgNS,'tspan');ts.textContent=label||code;t.appendChild(ts);
   if(sc){const sp=document.createElementNS(svgNS,'tspan');sp.textContent=sc.v;
-    sp.setAttribute('dx',(codeSize*0.1).toFixed(2));// explicit gap = 60% of the old space character
+    sp.setAttribute('dx',(codeSize*0.1).toFixed(2));sp.setAttribute('dy',-2);// gap = 60% of old space; score raised 2px
     sp.setAttribute('fill',sc.c);sp.setAttribute('font-size',(codeSize*0.8).toFixed(2));t.appendChild(sp);}
   brSvg.appendChild(t);
 }
@@ -786,10 +786,11 @@ const bRight=buildBH(bRS,bRM,bSeedR,34,-1,0.87);
 
 const bFinX=(bLeft.sfX+bRight.sfX)/2;
 const bFinY=(bLeft.sfY+bRight.sfY)/2;
-bTxt(bFinX,bFinY-12,'FINAL',20,bGC,'middle');
-bTxt(bFinX,bFinY+10,'Match',16,P.koFeeder,'middle');bTxt(bFinX,bFinY+24,'#104',15,P.koFeeder,'middle');
-bTxt(bFinX,bFinY+42,'3rd · #103',14,'#778','middle');
-const bThird=bWin(103);if(bThird)bChip(bFinX,bFinY+64,bThird,35.28,15.75,null,null,scSide(103,bThird));
+const bFinYc=bFinY-Math.round(43.12*2/3/2);// raise the final block by half a flag height so it centers on the flags, not the feeder lines
+bTxt(bFinX,bFinYc-12,'FINAL',20,bGC,'middle');
+bTxt(bFinX,bFinYc+10,'Match',16,P.koFeeder,'middle');bTxt(bFinX,bFinYc+24,'#104',15,P.koFeeder,'middle');
+bTxt(bFinX,bFinYc+42,'3rd · #103',14,'#778','middle');
+const bThird=bWin(103);if(bThird)bChip(bFinX,bFinYc+64,bThird,35.28,15.75,null,null,scSide(103,bThird));
 
 // Add title
 bTxt(bSeedR/2+bSeedL/2,18,LANG==='es'?'FASE ELIMINATORIA':'KNOCKOUT STAGE',26,bGC,'middle');
@@ -797,7 +798,7 @@ bTxt(bSeedR/2+bSeedL/2,18,LANG==='es'?'FASE ELIMINATORIA':'KNOCKOUT STAGE',26,bG
 const bMaxY=bLeft.botY+35;
 // Champion showcase — bottom center: flag+code sit above a line, 'CHAMPION' beneath it
 const champLineY=bMaxY-46, champHW=56;
-bLn(bFinX-champHW,champLineY,bFinX+champHW,champLineY);
+bLn(bFinX-champHW,champLineY-3,bFinX+champHW,champLineY-3);// line only, raised 3px for breathing room above CHAMPION
 const bChamp=bWin(104);
 if(bChamp){const cfW=89.2584,cfh=Math.round(cfW*2/3);bChip(bFinX,champLineY-6-cfh/2,bChamp,cfW,23.625,(t_team(NM[bChamp])||bChamp).toUpperCase(),3.5,scSide(104,bChamp));}// flag 1.5x+15%; full country name instead of code
 const bSc=SZ.w/3768;// per-size bracket scale: 24x16=1.0, A3≈0.943, Letter(22x17)≈0.876
@@ -823,7 +824,7 @@ ga.appendChild(brSvg);
 // Trophy emoji as HTML div
 const tDiv=document.createElement('div');
 tDiv.innerHTML='&#x1F3C6;';
-tDiv.style.cssText='position:absolute;top:'+(bracketTop+(bFinY-52)*bSc)+'px;left:'+(bracketLeft+(bFinX-15)*bSc)+'px;width:'+(30*bSc)+'px;font-size:'+(25*bSc)+'px;text-align:center;z-index:6;pointer-events:none';
+tDiv.style.cssText='position:absolute;top:'+(bracketTop+(bFinYc-52)*bSc)+'px;left:'+(bracketLeft+(bFinX-15)*bSc)+'px;width:'+(30*bSc)+'px;font-size:'+(25*bSc)+'px;text-align:center;z-index:6;pointer-events:none';
 ga.appendChild(tDiv);
 // Champion label: trophy + word, centered under the champion line (HTML div = color trophy)
 const champDiv=document.createElement('div');
