@@ -790,7 +790,6 @@ const bFinYc=bFinY-Math.round(43.12*2/3/2);// raise the final block by half a fl
 bTxt(bFinX,bFinYc-12,'FINAL',20,bGC,'middle');
 bTxt(bFinX,bFinYc+10,'Match',16,P.koFeeder,'middle');bTxt(bFinX,bFinYc+24,'#104',15,P.koFeeder,'middle');
 bTxt(bFinX,bFinYc+42,'3rd · #103',14,'#778','middle');
-const bThird=bWin(103);if(bThird)bChip(bFinX,bFinYc+64,bThird,35.28,15.75,null,null,scSide(103,bThird));
 
 // Add title
 bTxt(bSeedR/2+bSeedL/2,18,LANG==='es'?'FASE ELIMINATORIA':'KNOCKOUT STAGE',26,bGC,'middle');
@@ -800,7 +799,7 @@ const bMaxY=bLeft.botY+35;
 const champLineY=bMaxY-46, champHW=56;
 bLn(bFinX-champHW,champLineY-3,bFinX+champHW,champLineY-3);// line only, raised 3px for breathing room above CHAMPION
 const bChamp=bWin(104);
-if(bChamp){const cfW=89.2584,cfh=Math.round(cfW*2/3);bChip(bFinX,champLineY-6-cfh/2,bChamp,cfW,23.625,(t_team(NM[bChamp])||bChamp).toUpperCase(),3.5,scSide(104,bChamp));}// flag 1.5x+15%; full country name instead of code
+if(bChamp){const cfW=89.2584,cfh=Math.round(cfW*2/3);bChip(bFinX,champLineY-6-cfh/2,bChamp,cfW,23.625,(t_team(NM[bChamp])||bChamp).toUpperCase(),3.5);}// champion: flag + full country name, no score
 const bSc=SZ.w/3768;// per-size bracket scale: 24x16=1.0, A3≈0.943, Letter(22x17)≈0.876
 brSvg.setAttribute('width',(bSeedR+54)*bSc);
 brSvg.setAttribute('height',(bMaxY+7)*bSc);
